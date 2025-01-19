@@ -1,6 +1,6 @@
 # Ryhmä kalenteri sovellus
 
-Ominaisuuksia:
+Ominaisuuksia:\\
 Käyttäjän luonti
 Ryhmän luonti
 Oikeuksien antaminen ja muokkaaminen omaan ryhmään
