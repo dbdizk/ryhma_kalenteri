@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>Uusi tapahtuma</title>
+</head>
+
+<body>
+    <h1>Uusi tapahtuma</h1>
+  <form action="/create_entry" method="post">
+    <p>
+      Otsikko <br />
+      <input type="text" name="title" />
+    </p>
+    <p>
+        Tapahtuman kuvaus: <br/>
+        <textarea name="description" rows="8" cols="60"></textarea>
+    </p>
+    <p>
+        Ajankohta: <br/>
+        <input type="text" name="date"/>
+    </p>
+    <p>
+        Kesto: <br/>
+        <input type="text" name="duration"/>
+    </p>
+    <input type="submit" value="Luo tapahtuma" />
+  </form>
+</body>
+
+</html>
