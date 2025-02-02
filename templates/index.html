@@ -6,6 +6,7 @@
 </head>
 
 <body>
+    <h1>Kalenteri</h1>
   {% if session.username %}
   <p>
     Olet kirjautunut nimellä {{ session.username }}, id on {{session.user_id}}
@@ -20,6 +21,7 @@
   <p>
     <a href="/new_entry">Uusi tapahtuma</a>
   </p>
+  <h2>Tapahtumat</h2>
   
 </body>
 
