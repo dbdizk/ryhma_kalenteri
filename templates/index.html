@@ -22,7 +22,11 @@
     <a href="/new_entry">Uusi tapahtuma</a>
   </p>
   <h2>Tapahtumat</h2>
-  
+  <ul>
+    {% for entry in entries %}
+    <li>{{ entry.title }}</li>
+    {% endfor %}
+  </ul>
 </body>
 
 </html>
