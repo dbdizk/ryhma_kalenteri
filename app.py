@@ -24,19 +24,38 @@ def show_entry(entry_id):
 def new_entry():
     return render_template("new_entry.html")
 
+
 @app.route("/create_entry", methods=["POST"])
 def create_entry():
     title=request.form["title"]
     description=request.form["description"]
     date=request.form["date"]
+    time=request.form["time"]
     duration=request.form["duration"]
     user_id = session["user_id"]
 
-    entries.add_entry(title,description,date,duration)
+    entries.add_entry(title,description,date,time,duration,user_id)
 
 
     return redirect("/")
 
+@app.route("/edit_entry/<int:entry_id>")
+def edit_entry(entry_id):
+    entry = entries.get_entry(entry_id)
+    return render_template("edit_entry.html", entry=entry)
+
+@app.route("/update_entry", methods=["POST"])
+def update_entry():
+    entry_id=request.form["entry_id"]
+    title=request.form["title"]
+    description=request.form["description"]
+    date=request.form["date"]
+    time=request.form["time"]
+    duration=request.form["duration"]
+
+    entries.update_entry(entry_id, title, description, date, time, duration)
+
+    return redirect("/entry/" + str(entry_id))
 
 @app.route("/register")
 def register():
@@ -57,7 +76,7 @@ def create():
     except sqlite3.IntegrityError:
         return "VIRHE: tunnus on jo varattu"
 
-    return "Tunnus luotu"
+    return "Tunnus luotu <br> <a href='/'>Etusivulle</a>"
 
 @app.route("/login", methods=["GET", "POST"])
 def login():

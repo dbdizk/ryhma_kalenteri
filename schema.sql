@@ -8,7 +8,8 @@ CREATE TABLE entries(
     id INTEGER PRIMARY KEY,
     title TEXT,
     description TEXT,
-    date TEXT,
+    date DATETIME,
+    time TEXT,
     duration TEXT,
     user_id INTEGER REFERENCES users
 );

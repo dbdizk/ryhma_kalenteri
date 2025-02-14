@@ -9,10 +9,17 @@
     <header>
         <h1>Entry Details</h1>
     </header>
+    {% if session.user_id == entry.user_id %}
+    <p>
+      <a href="/edit_entry/{{ entry.id }}">Edit Entry</a>
+    </p>
+    {%endif%}
     <main>
         <article>
             <h2>{{ entry.title }}</h2>
             <p><strong>Date:</strong> {{ entry.date }}</p>
+            <p><strong>Time:</strong> {{ entry.time }}</p>
+            <p><strong>Duration:</strong> {{ entry.duration }}</p>
             <p><strong>Description:</strong> {{ entry.description }}</p>
             <p><strong>Creator:</strong> {{ entry.username }}</p>
         </article>
