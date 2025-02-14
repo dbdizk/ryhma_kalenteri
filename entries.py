@@ -16,3 +16,7 @@ def get_entry(entry_id):
 def update_entry(entry_id, title, description, date, time, duration):
     sql = """UPDATE entries SET title = ?, description = ?, date = ?, time = ?, duration = ? WHERE id = ?"""
     db.execute(sql, [title, description, date, time, duration, entry_id])
+
+def delete_entry(entry_id):
+    sql = "DELETE FROM entries WHERE id = ?"
+    db.execute(sql, [entry_id])

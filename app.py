@@ -57,6 +57,26 @@ def update_entry():
 
     return redirect("/entry/" + str(entry_id))
 
+@app.route("/delete_entry/<int:entry_id>")
+def delete_entry(entry_id):
+    entry = entries.get_entry(entry_id)
+    return render_template("delete_entry.html", entry=entry)
+
+@app.route("/confirm_delete", methods=["POST"])
+def confirm_delete():
+    entry_id = request.form["entry_id"]
+    password = request.form["password"]
+
+    sql = "SELECT password_hash FROM users WHERE id = ?"
+    result = db.query(sql, [session["user_id"]])[0]
+    password_hash = result["password_hash"]
+
+    if check_password_hash(password_hash, password):
+        entries.delete_entry(entry_id)
+        return redirect("/")
+    else:
+        return f"ERROR: Wrong password <br> <a href='/entry/{entry_id}'>Return to the entry</a>"
+
 @app.route("/register")
 def register():
     return render_template("register.html")
