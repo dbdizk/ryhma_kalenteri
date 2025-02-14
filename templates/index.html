@@ -24,7 +24,7 @@
   <h2>Tapahtumat</h2>
   <ul>
     {% for entry in entries %}
-    <li>{{ entry.title }}</li>
+    <li><a href="/entry/{{ entry.id }}">{{ entry.title }}</a></li>
     {% endfor %}
   </ul>
 </body>
