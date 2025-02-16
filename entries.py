@@ -20,3 +20,8 @@ def update_entry(entry_id, title, description, date, time, duration):
 def delete_entry(entry_id):
     sql = "DELETE FROM entries WHERE id = ?"
     db.execute(sql, [entry_id])
+
+def find_entries(query):
+    sql = """SELECT id, title FROM entries WHERE description LIKE ? OR title LIKE ? ORDER BY id DESC"""
+    like = "%" + query + "%"
+    return db.query(sql, [like, like])

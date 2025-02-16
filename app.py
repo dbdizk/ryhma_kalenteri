@@ -14,6 +14,16 @@ def index():
     all_entries = entries.get_entries()
     return render_template("index.html", entries=all_entries)
 
+@app.route("/find_entry")
+def find_entry():
+    query = request.args.get("query")
+    if query:
+        results = entries.find_entries(query)
+    else:
+        query = ""
+        results = []
+    return render_template("find_entry.html", query=query, results=results)    
+
 @app.route("/entry/<int:entry_id>")
 def show_entry(entry_id):
     entry = entries.get_entry(entry_id)
@@ -76,6 +86,7 @@ def confirm_delete():
         return redirect("/")
     else:
         return f"ERROR: Wrong password <br> <a href='/entry/{entry_id}'>Return to the entry</a>"
+    
 
 @app.route("/register")
 def register():
