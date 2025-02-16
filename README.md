@@ -18,3 +18,7 @@ Käyttäjien luonti ja kirjautuminen lisätty.
 Tapahtumien luonti lisätty.
 
 Tavoitteena olla ajantasalla seuraavassa välipalautuksessa.
+
+# Välipalautus 3
+
+Edellisen välipalautuksen palautteessa mainittuja ongelmia korjattu, ja jatkettu eteenpäin. Ei vieläkään ihan ajan tasalla välipalautteen suositeltuihin tavoitteisiin nähden, mutta eiköhän tämä tästä valmistu ennen viimeistä deadlineä.
