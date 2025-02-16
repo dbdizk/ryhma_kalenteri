@@ -11,7 +11,9 @@ def get_entries():
 
 def get_entry(entry_id):
     sql = """SELECT entries.id, entries.title, entries.description, entries.date, entries.time, entries.duration, users.id user_id, users.username FROM entries, users WHERE entries.user_id = users.id AND entries.id = ?"""
-    return db.query(sql, [entry_id])[0]
+    result = db.query(sql, [entry_id])
+    return result[0] if result else None
+
 
 def update_entry(entry_id, title, description, date, time, duration):
     sql = """UPDATE entries SET title = ?, description = ?, date = ?, time = ?, duration = ? WHERE id = ?"""

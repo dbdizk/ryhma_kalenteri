@@ -27,6 +27,8 @@ def find_entry():
 @app.route("/entry/<int:entry_id>")
 def show_entry(entry_id):
     entry = entries.get_entry(entry_id)
+    if not entry:
+        abort(404)
     return render_template("show_entry.html", entry=entry)
 
 
@@ -52,6 +54,8 @@ def create_entry():
 @app.route("/edit_entry/<int:entry_id>")
 def edit_entry(entry_id):
     entry = entries.get_entry(entry_id)
+    if not entry:
+        abort(404)
     if entry["user_id"] != session["user_id"]:
         abort(403)
     return render_template("edit_entry.html", entry=entry)
@@ -60,6 +64,8 @@ def edit_entry(entry_id):
 def update_entry():
     entry_id=request.form["entry_id"]
     entry = entries.get_entry(entry_id)
+    if not entry:
+        abort(404)
     if entry["user_id"] != session["user_id"]:
         abort(403)
 
@@ -76,6 +82,8 @@ def update_entry():
 @app.route("/delete_entry/<int:entry_id>")
 def delete_entry(entry_id):
     entry = entries.get_entry(entry_id)
+    if not entry:
+        abort(404)
     if entry["user_id"] != session["user_id"]:
         abort(403)
     return render_template("delete_entry.html", entry=entry)
