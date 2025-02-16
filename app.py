@@ -9,6 +9,10 @@ import entries
 app = Flask(__name__)
 app.secret_key = config.secret_key
 
+def check_login():
+    if "user_id" not in session:
+        abort(403)
+
 @app.route("/")
 def index():
     all_entries = entries.get_entries()
@@ -34,11 +38,13 @@ def show_entry(entry_id):
 
 @app.route("/new_entry")
 def new_entry():
+    check_login()
     return render_template("new_entry.html")
 
 
 @app.route("/create_entry", methods=["POST"])
 def create_entry():
+    check_login()
     title=request.form["title"]
     description=request.form["description"]
     date=request.form["date"]
@@ -53,6 +59,7 @@ def create_entry():
 
 @app.route("/edit_entry/<int:entry_id>")
 def edit_entry(entry_id):
+    check_login()
     entry = entries.get_entry(entry_id)
     if not entry:
         abort(404)
@@ -81,6 +88,7 @@ def update_entry():
 
 @app.route("/delete_entry/<int:entry_id>")
 def delete_entry(entry_id):
+    check_login()
     entry = entries.get_entry(entry_id)
     if not entry:
         abort(404)
@@ -149,6 +157,7 @@ def login():
 
 @app.route("/logout")
 def logout():
-    del session["user_id"]
-    del session["username"]
+    if "user_id" in session:
+        del session["user_id"]
+        del session["username"]
     return redirect("/")
