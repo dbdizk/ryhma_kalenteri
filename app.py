@@ -1,6 +1,6 @@
 import sqlite3
 from flask import Flask
-from flask import redirect, render_template, request, session
+from flask import abort, redirect, render_template, request, session
 from werkzeug.security import generate_password_hash, check_password_hash
 import config
 import db
@@ -52,11 +52,17 @@ def create_entry():
 @app.route("/edit_entry/<int:entry_id>")
 def edit_entry(entry_id):
     entry = entries.get_entry(entry_id)
+    if entry["user_id"] != session["user_id"]:
+        abort(403)
     return render_template("edit_entry.html", entry=entry)
 
 @app.route("/update_entry", methods=["POST"])
 def update_entry():
     entry_id=request.form["entry_id"]
+    entry = entries.get_entry(entry_id)
+    if entry["user_id"] != session["user_id"]:
+        abort(403)
+
     title=request.form["title"]
     description=request.form["description"]
     date=request.form["date"]
@@ -70,6 +76,8 @@ def update_entry():
 @app.route("/delete_entry/<int:entry_id>")
 def delete_entry(entry_id):
     entry = entries.get_entry(entry_id)
+    if entry["user_id"] != session["user_id"]:
+        abort(403)
     return render_template("delete_entry.html", entry=entry)
 
 @app.route("/confirm_delete", methods=["POST"])

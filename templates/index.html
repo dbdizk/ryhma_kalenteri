@@ -10,17 +10,20 @@
   {% if session.username %}
   <p>
     Olet kirjautunut nimellä {{ session.username }}, id on {{session.user_id}}
+    <br><a href="/logout">Kirjaudu ulos</a>
   </p>
   {%endif%}
+  {% if not session.username %}
   <p>
     <a href="/login">Kirjaudu sisään</a>
     <a href="/register">Luo tunnus</a>
-    <a href="/logout">Kirjaudu ulos</a>
   </p>
-
+  {%endif%}
+  {% if session.username %}
   <p>
     <a href="/new_entry">Uusi tapahtuma</a>
   </p>
+  {%endif%}
   <p>
     <a href="/find_entry">Etsi tapahtuma</a>
   </p>
