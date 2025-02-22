@@ -46,7 +46,11 @@ def new_entry():
 def create_entry():
     check_login()
     title=request.form["title"]
+    if not title or len(title) > 50:
+        abort(403)
     description=request.form["description"]
+    if not description or len(description) > 1000:
+        abort(403)
     date=request.form["date"]
     time=request.form["time"]
     duration=request.form["duration"]
