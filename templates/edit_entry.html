@@ -9,7 +9,7 @@
     <h1>Edit Entry</h1>
     <form action="/update_entry" method="post">
         <label for="title">Title:</label>
-        <input type="text" id="title" name="title" value="{{entry.title}}" required><br><br>
+        <input type="text" id="title" name="title" value="{{entry.title}}" maxlength="50" required><br><br>
         
         <label for="date">Date:</label>
         <input type="date" id="date" name="date" value="{{entry.date}}" required><br><br>
@@ -21,7 +21,7 @@
         <input type="text" id="duration" name="duration" value="{{entry.duration}}" required><br><br>
         
         <label for="description">Description:</label><br>
-        <textarea id="description" name="description" rows="4" cols="50" required>{{entry.description}}</textarea><br><br>
+        <textarea id="description" name="description" rows="4" cols="50" maxlength="1000" required>{{entry.description}}</textarea><br><br>
         
         <input type="hidden" name="entry_id" value="{{ entry.id }}">
         
