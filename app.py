@@ -5,6 +5,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 import config
 import db
 import entries
+import users
 
 app = Flask(__name__)
 app.secret_key = config.secret_key
@@ -17,6 +18,14 @@ def check_login():
 def index():
     all_entries = entries.get_entries()
     return render_template("index.html", entries=all_entries)
+
+@app.route("/user/<int:user_id>")
+def show_user(user_id):
+    user = users.get_user(user_id)
+    if not user:
+        abort(404)
+    entries = users.get_entries(user_id)
+    return render_template("show_user.html", user=user, entries=entries)
 
 @app.route("/find_entry")
 def find_entry():

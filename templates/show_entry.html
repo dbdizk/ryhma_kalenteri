@@ -24,7 +24,7 @@
             <p><strong>Time:</strong> {{ entry.time }}</p>
             <p><strong>Duration:</strong> {{ entry.duration }}</p>
             <p><strong>Description:</strong> {{ entry.description }}</p>
-            <p><strong>Creator:</strong> {{ entry.username }}</p>
+            <p><strong>Creator:</strong> <a href="/user/{{entry.user_id}}"> {{ entry.username }}</p>
         </article>
         <a href="/">Back to Main Page</a>
     </main>
