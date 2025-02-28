@@ -15,7 +15,11 @@ def create_user(username, password1):
     sql = "INSERT INTO users (username, password_hash) VALUES (?, ?)"
     db.execute(sql, [username, password_hash])
 
-
+def check_password(user_id, password):
+    sql = "SELECT password_hash FROM users WHERE id = ?"
+    result = db.query(sql, [user_id])[0]
+    password_hash = result["password_hash"]
+    return check_password_hash(password_hash, password)
 
 
 def check_login(username, password):

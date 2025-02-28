@@ -5,6 +5,9 @@ import config
 import db
 import entries
 import users
+import categories
+import groups
+
 
 app = Flask(__name__)
 app.secret_key = config.secret_key
@@ -47,8 +50,40 @@ def show_entry(entry_id):
 @app.route("/new_entry")
 def new_entry():
     check_login()
-    return render_template("new_entry.html")
+    all_categories=categories.get_categories()
+    return render_template("new_entry.html", categories=all_categories)
 
+@app.route("/new_group")
+def new_group():
+    check_login()
+    return render_template("new_group.html")
+
+@app.route("/create_group", methods=["POST"])
+def create_group():
+    check_login()
+    name = request.form["name"]
+    if not name or len(name) > 50:
+        abort(403)
+    description = request.form["description"]
+    if not description or len(description) > 1000:
+        abort(403)
+    user_id = session["user_id"]
+    groups.add_group(name, description)
+    return redirect("/")
+
+@app.route("/new_category")
+def new_category():
+    check_login()
+    return render_template("new_category.html")
+
+@app.route("/create_category", methods=["POST"])
+def create_category():
+    check_login()
+    name = request.form["category_name"]
+    if not name or len(name) > 50:
+        abort(403)
+    categories.add_category(name)
+    return redirect("/")
 
 @app.route("/create_entry", methods=["POST"])
 def create_entry():
@@ -64,7 +99,9 @@ def create_entry():
     duration=request.form["duration"]
     user_id = session["user_id"]
 
-    entries.add_entry(title,description,date,time,duration,user_id)
+    category_id = request.form["category"]
+    group = request.form["group"]
+    entries.add_entry(title,description,date,time,duration,user_id,category_id)
 
 
     return redirect("/")
@@ -117,11 +154,7 @@ def confirm_delete():
     entry_id = request.form["entry_id"]
     password = request.form["password"]
 
-    sql = "SELECT password_hash FROM users WHERE id = ?"
-    result = db.query(sql, [session["user_id"]])[0]
-    password_hash = result["password_hash"]
-
-    if check_password_hash(password_hash, password):
+    if users.check_password(session["user_id"], password):
         entries.delete_entry(entry_id)
         return redirect("/")
     else:

@@ -6,14 +6,14 @@
 </head>
 
 <body>
-    <h1>Uusi tapahtuma</h1>
+    <h1>New event</h1>
   <form action="/create_entry" method="post">
     <p>
-      Otsikko *<br />
+      Title *<br />
       <input type="text" name="title" maxlength="50" required/>
     </p>
     <p>
-        Tapahtuman kuvaus: *<br/>
+        Event description: *<br/>
         <textarea name="description" rows="8" cols="60" maxlength="1000" required></textarea>
     </p>
     <p>
@@ -25,8 +25,26 @@
       <input type="time" name="time" required/>
     </p>
     <p>
-        Kesto: *<br/>
+        Duration: *<br/>
         <input type="text" name="duration" required/>
+    </p>
+    <p>
+      Category: *<br/>
+      <select name="category" required>
+        {% for category in categories %}
+          <option value="{{ category.id }}">{{ category.name }}</option>
+        {% endfor %}
+      </select>
+    </p>
+    <p>
+      Group: *<br/>
+      <select name="group" required>
+          <option value="family">Family</option>
+          <option value="friends">Friends</option>
+          <option value="work">Work</option>
+          <option value="community">Community</option>
+          <option value="other">Other</option>
+      </select>
     </p>
     <input type="submit" value="Luo tapahtuma" />
   </form>
