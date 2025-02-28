@@ -17,8 +17,12 @@ def execute(sql, params=[]):
 def last_insert_id():
     return g.last_insert_id    
     
-def query(sql, params=[]):
-    con = get_connection()
-    result = con.execute(sql, params).fetchall()
-    con.close()
+def query(sql, params=()):
+    conn = get_connection()
+    conn.row_factory = sqlite3.Row
+    cursor = conn.cursor()
+    cursor.execute(sql, params)
+    result = cursor.fetchall()
+    conn.close()
     return result
+
