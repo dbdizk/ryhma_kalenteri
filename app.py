@@ -29,6 +29,48 @@ def show_user(user_id):
     entries = users.get_entries(user_id)
     return render_template("show_user.html", user=user, entries=entries)
 
+@app.route("/manage_groups")
+def manage_groups():
+    check_login()
+    user_id = session["user_id"]
+
+    # Fetch only groups where the user is an admin
+    admin_groups = groups.get_admin_groups(user_id)
+
+    if not admin_groups:
+        return "Error: You are not an admin of any group"
+
+    all_users = users.get_all_users()
+
+    # Attach members and roles for each group
+    for group in admin_groups:
+        group["members"] = users.get_users_in_group_with_roles(group["id"])  # ✅ Now this works!
+
+    return render_template("manage_groups.html", groups=admin_groups, users=all_users)
+
+
+
+
+@app.route("/add_user_to_group", methods=["POST"])
+def add_user_to_group():
+    check_login()
+
+    user_id = request.form.get("user_id")
+    group_id = request.form.get("group_id")
+
+    # Ensure both user and group exist
+    if not users.get_user(user_id):
+        return "Error: User does not exist"
+    if not groups.get_group(group_id):
+        return "Error: Group does not exist"
+
+    # Add user to group
+    result = groups.add_user_to_group(user_id, group_id)
+
+    return redirect("/manage_groups")
+
+
+
 @app.route("/find_entry")
 def find_entry():
     query = request.args.get("query", "").strip()
@@ -78,19 +120,24 @@ def new_group():
 @app.route("/create_group", methods=["POST"])
 def create_group():
     check_login()
+    
     name = request.form["group_name"]
+    description = request.form["description"]
+    creator_id = session["user_id"]  # Get the ID of the logged-in user
+
+    # Validate input length
     if not name or len(name) > 50:
         abort(403)
-    description = request.form["description"]
     if not description or len(description) > 1000:
         abort(403)
-    user_id = session["user_id"]
+
     try:
-        groups.add_group(name, description)
+        group_id = groups.add_group(name, description, creator_id)  # ✅ Pass creator_id here
     except sqlite3.IntegrityError:
-        return "ERROR: Group already exists <br> <a href='/'>return to main page</a>"
-    users.role_on_create_group(user_id,name)
+        return "ERROR: Group already exists <br> <a href='/'>Return to main page</a>"
+
     return "Group created <br> <a href='/'>return to main page</a>"
+
 
 @app.route("/new_category")
 def new_category():

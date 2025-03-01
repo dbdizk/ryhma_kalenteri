@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Groups</title>
+</head>
+<body>
+
+<h1>Manage Groups</h1>
+
+<h2>Add User to Group</h2>
+<form action="/add_user_to_group" method="post">
+    <label>Select User:</label>
+    <select name="user_id">
+        {% for user in users %}
+            <option value="{{ user.id }}">{{ user.username }}</option>
+        {% endfor %}
+    </select>
+
+    <label>Select Group:</label>
+    <select name="group_id">
+        {% for group in groups %}
+            <option value="{{ group.id }}">{{ group.name }}</option>
+        {% endfor %}
+    </select>
+
+    <input type="submit" value="Add User">
+</form>
+
+<h2>Current Group Members</h2>
+{% for group in groups %}
+    <h3>{{ group.name }}</h3>
+    <ul>
+        {% if group.members %}
+            {% for member in group.members %}
+                <li>{{ member.username }} - {{ member.role }}</li>
+            {% endfor %}
+        {% else %}
+            <li>No members in this group</li>
+        {% endif %}
+    </ul>
+{% endfor %}
+
+
+</body>
+</html>

@@ -52,4 +52,25 @@ def role_on_create_group(user_id, name):
     if rows_affected == 0:
         return None
 
-     
+def get_users_in_group(group_id):
+    sql = """SELECT u.id, u.username 
+             FROM users u
+             JOIN user_groups ug ON u.id = ug.user_id
+             WHERE ug.group_id = ?"""
+    result = db.query(sql, [group_id])
+    
+    return [dict(row) for row in result]  # Convert to list of dictionaries
+
+def get_users_in_group_with_roles(group_id):
+    sql = """SELECT u.id, u.username, r.name AS role 
+             FROM users u
+             JOIN user_groups ug ON u.id = ug.user_id
+             JOIN roles r ON ug.role_id = r.id
+             WHERE ug.group_id = ?"""
+    return db.query(sql, [group_id])
+
+
+
+# Function to get all users (for dropdown selection)
+def get_all_users():
+    return db.query("SELECT id, username FROM users")
