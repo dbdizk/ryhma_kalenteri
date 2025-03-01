@@ -31,13 +31,32 @@ def show_user(user_id):
 
 @app.route("/find_entry")
 def find_entry():
-    query = request.args.get("query")
-    if query:
-        results = entries.find_entries(query)
-    else:
-        query = ""
-        results = []
-    return render_template("find_entry.html", query=query, results=results)    
+    query = request.args.get("query", "").strip()
+
+    
+    group_ids = request.args.getlist("group_id")
+    category_ids = request.args.getlist("category_id")
+
+    
+    group_ids = [int(g) for g in group_ids if g.isdigit()]
+    category_ids = [int(c) for c in category_ids if c.isdigit()]
+
+    results = entries.find_entries(query, group_ids, category_ids)
+
+    all_groups = groups.get_groups()
+    all_categories = db.query("SELECT * FROM categories")
+
+    return render_template(
+        "find_entry.html",
+        query=query,
+        results=results,
+        all_groups=all_groups,
+        all_categories=all_categories,
+        selected_groups=group_ids,
+        selected_categories=category_ids
+    )
+
+    
 
 @app.route("/entry/<int:entry_id>")
 def show_entry(entry_id):
@@ -129,7 +148,9 @@ def edit_entry(entry_id):
         abort(404)
     if entry["user_id"] != session["user_id"]:
         abort(403)
-    return render_template("edit_entry.html", entry=entry, categories=all_categories)
+    all_groups = groups.get_groups()
+    entry_group_ids = groups.get_entry_group_ids(entry_id)
+    return render_template("edit_entry.html", entry=entry, categories=all_categories, all_groups=all_groups, entry_group_ids=entry_group_ids)
 
 @app.route("/update_entry", methods=["POST"])
 def update_entry():
@@ -152,6 +173,8 @@ def update_entry():
     category_id = request.form["category"]
 
     entries.update_entry(entry_id, title, description, date, time, duration, category_id)
+    new_group_ids = set(request.form.getlist("groups"))
+    groups.update_entry_groups(entry_id, new_group_ids)
 
     return redirect("/entry/" + str(entry_id))
 

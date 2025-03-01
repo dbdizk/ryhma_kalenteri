@@ -43,10 +43,37 @@ def delete_entry(entry_id):
     sql = "DELETE FROM entries WHERE id = ?"
     db.execute(sql, [entry_id])
 
-def find_entries(query):
-    sql = """SELECT id, title FROM entries WHERE description LIKE ? OR title LIKE ? ORDER BY id DESC"""
-    like = "%" + query + "%"
-    return db.query(sql, [like, like])
+def find_entries(query=None, group_ids=None, category_ids=None):
+    sql = """SELECT e.id, e.title, e.description, e.date, e.time, e.duration, 
+                    u.username, c.name AS category_name 
+             FROM entries e
+             JOIN users u ON e.user_id = u.id
+             LEFT JOIN categories c ON e.category_id = c.id
+             LEFT JOIN entry_groups eg ON e.id = eg.entry_id
+             WHERE 1=1 """  # Always true, allows dynamic conditions
+
+    params = []
+
+    # Apply filters dynamically
+    if query:
+        sql += " AND (e.title LIKE ? OR e.description LIKE ?)"
+        params.extend([f"%{query}%", f"%{query}%"])
+    
+    if group_ids:
+        placeholders = ",".join(["?"] * len(group_ids))
+        sql += f" AND eg.group_id IN ({placeholders})"
+        params.extend(group_ids)
+
+    if category_ids:
+        placeholders = ",".join(["?"] * len(category_ids))
+        sql += f" AND e.category_id IN ({placeholders})"
+        params.extend(category_ids)
+
+    sql += " GROUP BY e.id ORDER BY e.date DESC"
+
+    return db.query(sql, params)
+
+
 
 def assign_entry_to_groups(entry_id, group_ids):
     if not entry_id:

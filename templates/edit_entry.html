@@ -29,6 +29,13 @@
         
         <label for="description">Description:</label><br>
         <textarea id="description" name="description" rows="4" cols="50" maxlength="1000" required>{{entry.description}}</textarea><br><br>
+
+        <label>Select Groups:</label><br>
+        {% for group in all_groups %}
+            <input type="checkbox" name="groups" value="{{ group.id }}"
+                {% if group.id in entry_group_ids %} checked {% endif %}>
+            {{ group.name }}<br>
+        {% endfor %}
         
         <input type="hidden" name="entry_id" value="{{ entry.id }}">
         

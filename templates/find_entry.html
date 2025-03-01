@@ -3,27 +3,51 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Find Entry</title>
+    <title>Find Entries</title>
+
 </head>
 <body>
-    <h1>Find Calendar Entry</h1>
-    <form action="/find_entry" method="get">
-        <p>
-            Keyword: <input type="text" name="query" value="{{query}}">
-        </p>
-        <button type="submit">Find Entry</button>
-    </form>
-    <p>
-        <a href="/">Home</a>
-    </p>
 
-    {% if query %}
+    <h1>Find Entries</h1>
+
+    <form action="/find_entry" method="get">
+        <label>Search Keyword:</label>
+        <input type="text" name="query" value="{{ query }}">
+        
+        <h3>Filter by Groups:</h3>
+        <div class="filter-group">
+            {% for group in all_groups %}
+                <label>
+                    <input type="checkbox" name="group_id" value="{{ group.id }}" 
+                        {% if group.id in selected_groups %}checked{% endif %}>
+                    {{ group.name }}
+                </label><br>
+            {% endfor %}
+        </div>
+
+        <h3>Filter by Categories:</h3>
+        <div class="filter-group">
+            {% for category in all_categories %}
+                <label>
+                    <input type="checkbox" name="category_id" value="{{ category.id }}" 
+                        {% if category.id in selected_categories %}checked{% endif %}>
+                    {{ category.name }}
+                </label><br>
+            {% endfor %}
+        </div>
+
+        <input type="submit" value="Search">
+    </form>
+
     <h2>Search Results</h2>
     <ul>
         {% for entry in results %}
-        <li><a href="/entry/{{entry.id}}">{{entry.title}}</a></li>
+            <li>
+                <a href="/entry/{{ entry.id }}">{{ entry.title }}</a> - 
+                {{ entry.category_name or "No Category" }} by {{ entry.username }}
+            </li>
         {% endfor %}
     </ul>
-    {% endif %}
+
 </body>
-</html></html>
+</html>
