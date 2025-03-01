@@ -14,7 +14,7 @@ CREATE TABLE entries (
     time TEXT,
     duration TEXT,
     user_id INTEGER REFERENCES users,
-    category_id INTEGER REFERENCES categories -- Each entry has ONE category
+    category_id INTEGER DEFAULT 1 REFERENCES categories ON DELETE SET DEFAULT
 );
 
 -- Categories table
@@ -60,3 +60,7 @@ CREATE TABLE entry_rsvps (
     status TEXT CHECK(status IN ('attending', 'maybe', 'declined')) NOT NULL DEFAULT 'declined',
     PRIMARY KEY (user_id, entry_id)
 );
+
+-- Create default category
+INSERT INTO categories (id, name) VALUES (1, 'Uncategorized')
+ON CONFLICT (id) DO NOTHING;

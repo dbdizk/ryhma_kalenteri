@@ -10,6 +10,13 @@
     <form action="/update_entry" method="post">
         <label for="title">Title:</label>
         <input type="text" id="title" name="title" value="{{entry.title}}" maxlength="50" required><br><br>
+
+        <label for="category">Category:</label>
+        <select id="category" name="category" required>
+            {% for category in categories %}
+            <option value="{{category.id}}" {% if category.id == entry.category_id %} selected {% endif %}>{{category.name}}</option>
+            {% endfor %}
+        </select><br><br>
         
         <label for="date">Date:</label>
         <input type="date" id="date" name="date" value="{{entry.date}}" required><br><br>

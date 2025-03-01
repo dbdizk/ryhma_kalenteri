@@ -1,8 +1,8 @@
 import db
 
-def add_entry(title,description,date,time ,duration,user_id):
-    sql = "INSERT INTO entries (title, description, date, time, duration, user_id) VALUES (?, ?, ?, ?, ?, ?)"
-    db.execute(sql, [title, description, date, time, duration, user_id])
+def add_entry(title,description,date,time,duration,user_id,category_id):
+    sql = "INSERT INTO entries (title, description, date, time, duration, user_id, category_id) VALUES (?, ?, ?, ?, ?, ?, ?)"
+    db.execute(sql, [title, description, date, time, duration, user_id, category_id])
 
 
 def get_entries():
@@ -10,14 +10,30 @@ def get_entries():
     return db.query(sql)
 
 def get_entry(entry_id):
-    sql = """SELECT entries.id, entries.title, entries.description, entries.date, entries.time, entries.duration, users.id user_id, users.username FROM entries, users WHERE entries.user_id = users.id AND entries.id = ?"""
+    sql = """SELECT 
+                entries.id, 
+                entries.title, 
+                entries.description, 
+                entries.date, 
+                entries.time, 
+                entries.duration, 
+                users.id AS user_id, 
+                users.username, 
+                categories.name AS category_name
+             FROM entries
+             JOIN users ON entries.user_id = users.id
+             LEFT JOIN categories ON entries.category_id = categories.id
+             WHERE entries.id = ?"""
+    
     result = db.query(sql, [entry_id])
     return result[0] if result else None
 
 
-def update_entry(entry_id, title, description, date, time, duration):
-    sql = """UPDATE entries SET title = ?, description = ?, date = ?, time = ?, duration = ? WHERE id = ?"""
-    db.execute(sql, [title, description, date, time, duration, entry_id])
+
+
+def update_entry(entry_id, title, description, date, time, duration, category_id):
+    sql = """UPDATE entries SET title = ?, description = ?, date = ?, time = ?, duration = ?, category_id = ? WHERE id = ?"""
+    db.execute(sql, [title, description, date, time, duration, category_id, entry_id])
 
 def delete_entry(entry_id):
     sql = "DELETE FROM entries WHERE id = ?"

@@ -3,7 +3,7 @@ from flask import g
 
 def get_connection():
     con = sqlite3.connect("database.db")
-    con.execute("PRAGMA foreign_keys = ON")
+    con.execute("PRAGMA foreign_keys = ON;")
     con.row_factory = sqlite3.Row
     return con
 
@@ -18,7 +18,7 @@ def last_insert_id():
     return g.last_insert_id    
     
 def query(sql, params=()):
-    conn = get_connection()
+    conn = get_connection
     conn.row_factory = sqlite3.Row
     cursor = conn.cursor()
     cursor.execute(sql, params)

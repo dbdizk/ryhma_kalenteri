@@ -110,11 +110,12 @@ def create_entry():
 def edit_entry(entry_id):
     check_login()
     entry = entries.get_entry(entry_id)
+    all_categories = categories.get_categories()
     if not entry:
         abort(404)
     if entry["user_id"] != session["user_id"]:
         abort(403)
-    return render_template("edit_entry.html", entry=entry)
+    return render_template("edit_entry.html", entry=entry, categories=all_categories)
 
 @app.route("/update_entry", methods=["POST"])
 def update_entry():
@@ -134,20 +135,22 @@ def update_entry():
     date=request.form["date"]
     time=request.form["time"]
     duration=request.form["duration"]
+    category_id = request.form["category"]
 
-    entries.update_entry(entry_id, title, description, date, time, duration)
+    entries.update_entry(entry_id, title, description, date, time, duration, category_id)
 
     return redirect("/entry/" + str(entry_id))
 
-@app.route("/delete_entry/<int:entry_id>")
-def delete_entry(entry_id):
-    check_login()
-    entry = entries.get_entry(entry_id)
-    if not entry:
-        abort(404)
-    if entry["user_id"] != session["user_id"]:
-        abort(403)
-    return render_template("delete_entry.html", entry=entry)
+# For later use, after implementing user roles properly. WIP.
+#@app.route("/delete_category")
+#def delete_entry(entry_id):
+#    check_login()
+#    entry = entries.get_entry(entry_id)
+#    if not entry:
+#        abort(404)
+#    if entry["user_id"] != session["user_id"]:
+#        abort(403)
+#    return render_template("delete_entry.html", entry=entry)
 
 @app.route("/confirm_delete", methods=["POST"])
 def confirm_delete():
