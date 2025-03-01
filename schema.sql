@@ -36,6 +36,30 @@ CREATE TABLE roles (
     name TEXT UNIQUE CHECK(name IN ('admin', 'moderator', 'member'))
 );
 
+-- Create default roles
+INSERT INTO roles (id, name) VALUES 
+(1, 'admin'),
+(2, 'moderator'),
+(3, 'member')
+ON CONFLICT (id) DO NOTHING;
+
+-- Prevent inserting or updating roles
+CREATE TRIGGER prevent_role_insert
+BEFORE INSERT ON roles
+FOR EACH ROW
+WHEN NEW.id NOT IN (1, 2, 3) OR NEW.name NOT IN ('admin', 'moderator', 'member')
+BEGIN
+    SELECT RAISE(ABORT, 'You cannot insert new roles.');
+END;
+
+CREATE TRIGGER prevent_role_update
+BEFORE UPDATE ON roles
+FOR EACH ROW
+BEGIN
+    SELECT RAISE(ABORT, 'You cannot modify roles.');
+END;
+
+
 
 -- Many-to-many relationship between entries and groups
 CREATE TABLE entry_groups (

@@ -61,15 +61,19 @@ def new_group():
 @app.route("/create_group", methods=["POST"])
 def create_group():
     check_login()
-    name = request.form["name"]
+    name = request.form["group_name"]
     if not name or len(name) > 50:
         abort(403)
     description = request.form["description"]
     if not description or len(description) > 1000:
         abort(403)
     user_id = session["user_id"]
-    groups.add_group(name, description)
-    return redirect("/")
+    try:
+        groups.add_group(name, description)
+    except sqlite3.IntegrityError:
+        return "ERROR: Group already exists <br> <a href='/'>return to main page</a>"
+    users.role_on_create_group(user_id,name)
+    return "Group created <br> <a href='/'>return to main page</a>"
 
 @app.route("/new_category")
 def new_category():
@@ -173,14 +177,19 @@ def create():
     username = request.form["username"]
     password1 = request.form["password1"]
     password2 = request.form["password2"]
+    
     if password1 != password2:
         return "VIRHE: salasanat eivät ole samat"
     
     try:
-        users.create_user(username, password1)
+        user_id = users.create_user(username, password1)  # Get the new user's ID
+        session["user_id"] = user_id  # Automatically log in
+        session["username"] = username
     except sqlite3.IntegrityError:
         return "VIRHE: tunnus on jo varattu"
-    return "Tunnus luotu <br> <a href='/'>Etusivulle</a>"
+    
+    return redirect("/")
+
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
