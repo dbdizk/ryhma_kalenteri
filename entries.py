@@ -1,8 +1,12 @@
 import db
 
-def add_entry(title,description,date,time,duration,user_id,category_id):
-    sql = "INSERT INTO entries (title, description, date, time, duration, user_id, category_id) VALUES (?, ?, ?, ?, ?, ?, ?)"
+def add_entry(title, description, date, time, duration, user_id, category_id):
+    sql = """INSERT INTO entries (title, description, date, time, duration, user_id, category_id) 
+             VALUES (?, ?, ?, ?, ?, ?, ?)"""
     db.execute(sql, [title, description, date, time, duration, user_id, category_id])
+
+    return db.last_insert_id()
+
 
 
 def get_entries():
@@ -43,3 +47,20 @@ def find_entries(query):
     sql = """SELECT id, title FROM entries WHERE description LIKE ? OR title LIKE ? ORDER BY id DESC"""
     like = "%" + query + "%"
     return db.query(sql, [like, like])
+
+def assign_entry_to_groups(entry_id, group_ids):
+    if not entry_id:
+        print("Error: entry_id is None. Cannot assign to groups.")
+        return
+
+    sql = "INSERT INTO entry_groups (entry_id, group_id) VALUES (?, ?)"
+    
+    for group_id in group_ids:
+        db.execute(sql, [entry_id, group_id])
+
+
+def get_entry_groups(entry_id):
+    sql = """SELECT g.id, g.name FROM groups g
+             JOIN entry_groups eg ON g.id = eg.group_id
+             WHERE eg.entry_id = ?"""
+    return db.query(sql, [entry_id])

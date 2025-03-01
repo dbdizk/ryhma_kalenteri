@@ -44,14 +44,12 @@ def show_entry(entry_id):
     entry = entries.get_entry(entry_id)
     if not entry:
         abort(404)
-    return render_template("show_entry.html", entry=entry)
+    
+    entry_groups = entries.get_entry_groups(entry_id)
+    return render_template("show_entry.html", entry=entry,entry_groups=entry_groups)
 
 
-@app.route("/new_entry")
-def new_entry():
-    check_login()
-    all_categories=categories.get_categories()
-    return render_template("new_entry.html", categories=all_categories)
+
 
 @app.route("/new_group")
 def new_group():
@@ -89,6 +87,13 @@ def create_category():
     categories.add_category(name)
     return redirect("/")
 
+@app.route("/new_entry")
+def new_entry():
+    check_login()
+    all_categories=categories.get_categories()
+    all_groups=groups.get_groups()
+    return render_template("new_entry.html", categories=all_categories, groups=all_groups)
+
 @app.route("/create_entry", methods=["POST"])
 def create_entry():
     check_login()
@@ -104,8 +109,13 @@ def create_entry():
     user_id = session["user_id"]
 
     category_id = request.form["category"]
-    group = request.form["group"]
-    entries.add_entry(title,description,date,time,duration,user_id,category_id)
+    entry_id = entries.add_entry(title,description,date,time,duration,user_id,category_id)
+    
+    if not entry_id:
+        return "Error: Could not create entry", 500  # Stop execution if entry creation fails
+
+    group_ids=request.form.getlist("groups")
+    entries.assign_entry_to_groups(entry_id, group_ids)
 
 
     return redirect("/")
