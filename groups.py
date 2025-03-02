@@ -108,4 +108,12 @@ def get_user_groups(user_id):
 def get_user_group_ids(user_id):
     sql = "SELECT group_id FROM user_groups WHERE user_id = ?"
     result = db.query(sql, [user_id])
-    return [row["group_id"] for row in result]  # Return a list of group IDs
+
+    # Convert rows into a proper list of integers
+    group_ids = [int(row["group_id"]) for row in result]
+
+    print(f"DEBUG: User {user_id} is in groups: {group_ids}")  # Updated debug
+
+    return group_ids  # ✅ Now correctly returns a list of integers
+
+

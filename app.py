@@ -7,6 +7,7 @@ import entries
 import users
 import categories
 import groups
+import rsvps
 
 
 app = Flask(__name__)
@@ -18,8 +19,13 @@ def check_login():
 
 @app.route("/")
 def index():
-    all_entries = entries.get_entries()
+    if "user_id" in session:
+        all_entries = entries.get_entries(session["user_id"])
+    else:
+        all_entries = entries.get_public_entries()  # Fetch only ungrouped events for guests
+
     return render_template("index.html", entries=all_entries)
+
 
 @app.route("/user/<int:user_id>")
 def show_user(user_id):
@@ -28,6 +34,24 @@ def show_user(user_id):
         abort(404)
     entries = users.get_entries(user_id)
     return render_template("show_user.html", user=user, entries=entries)
+
+@app.route("/rsvp", methods=["POST"])
+def rsvp():
+    check_login()
+    user_id = session["user_id"]
+    entry_id = request.form["entry_id"]
+    status = request.form["status"]
+
+    # Ensure the event exists
+    entry = entries.get_entry(entry_id)
+    if not entry:
+        abort(404)
+
+    # Insert or update RSVP status
+    rsvps.add_rsvp(user_id, entry_id, status)
+
+    return redirect(f"/entry/{entry_id}")
+
 
 @app.route("/manage_groups")
 def manage_groups():
@@ -143,12 +167,34 @@ def find_entry():
 
 @app.route("/entry/<int:entry_id>")
 def show_entry(entry_id):
+    check_login()
+    user_id = session["user_id"]
+
     entry = entries.get_entry(entry_id)
     if not entry:
         abort(404)
-    
+
     entry_groups = entries.get_entry_groups(entry_id)
-    return render_template("show_entry.html", entry=entry,entry_groups=entry_groups)
+
+    # If the entry is assigned to groups, check if the user is in one of them
+    if entry_groups:
+        user_group_ids = set(groups.get_user_group_ids(user_id))
+        entry_group_ids = {group["id"] for group in entry_groups}
+
+        print(f"DEBUG: Entry {entry_id} is in groups: {entry_group_ids}")
+        print(f"DEBUG: User {user_id} is in groups: {user_group_ids}")
+
+        # If the user is NOT in any of the entry's groups, deny access
+        if not entry_group_ids.intersection(user_group_ids):
+            return "Error: You do not have permission to view this entry <br> <a href='/'>Return to main page</a>", 403
+
+    # Fetch RSVP details
+    user_rsvp = rsvps.get_user_rsvp(user_id, entry_id)
+    event_rsvps = rsvps.get_event_rsvps(entry_id)
+
+    return render_template("show_entry.html", entry=entry, entry_groups=entry_groups, user_rsvp=user_rsvp, event_rsvps=event_rsvps)
+
+
 
 
 
@@ -216,8 +262,12 @@ def create_entry():
     user_id = session["user_id"]
     category_id = request.form["category"]
 
-    selected_groups = set(request.form.getlist("groups"))
+    selected_groups = set(map(int, request.form.getlist("groups")))
     user_group_ids = set(groups.get_user_group_ids(user_id))
+
+        # Debugging output
+    print(f"DEBUG: User {user_id} is in groups: {user_group_ids}")
+    print(f"DEBUG: User is trying to add entry to groups: {selected_groups}")
 
     if not selected_groups.issubset(user_group_ids):
         return "Error: You cannot add an entry to a group you do not belong to <br> <a href='/new_entry'>Return to entry creation</a>"
@@ -267,7 +317,7 @@ def update_entry():
     time=request.form["time"]
     duration=request.form["duration"]
     category_id = request.form["category"]
-    selected_groups = set(request.form.getlist("groups"))
+    selected_groups = set(map(int, request.form.getlist("groups")))
     user_group_ids = set(groups.get_user_group_ids(user_id))
 
     if not selected_groups.issubset(user_group_ids):

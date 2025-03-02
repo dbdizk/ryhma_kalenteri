@@ -9,9 +9,36 @@ def add_entry(title, description, date, time, duration, user_id, category_id):
 
 
 
-def get_entries():
-    sql = "SELECT id, title FROM entries ORDER BY id DESC"
+def get_entries(user_id):
+    sql = """SELECT e.id, e.title, e.description, e.date, e.time, e.duration, 
+                    u.username, c.name AS category_name
+             FROM entries e
+             JOIN users u ON e.user_id = u.id
+             LEFT JOIN categories c ON e.category_id = c.id
+             LEFT JOIN entry_groups eg ON e.id = eg.entry_id
+             WHERE e.id IN (
+                SELECT e.id FROM entries e
+                LEFT JOIN entry_groups eg ON e.id = eg.entry_id
+                WHERE eg.group_id IS NULL OR eg.group_id IN (
+                    SELECT group_id FROM user_groups WHERE user_id = ?
+                )
+             )
+             GROUP BY e.id ORDER BY e.date DESC"""
+    return db.query(sql, [user_id])
+
+def get_public_entries():
+    sql = """SELECT e.id, e.title, e.description, e.date, e.time, e.duration, 
+                    u.username, c.name AS category_name
+             FROM entries e
+             JOIN users u ON e.user_id = u.id
+             LEFT JOIN categories c ON e.category_id = c.id
+             LEFT JOIN entry_groups eg ON e.id = eg.entry_id
+             WHERE eg.entry_id IS NULL  -- Select only events with no groups
+             GROUP BY e.id
+             ORDER BY e.date ASC"""
     return db.query(sql)
+
+
 
 def get_entry(entry_id):
     sql = """SELECT 

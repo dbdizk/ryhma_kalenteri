@@ -77,13 +77,15 @@ CREATE TABLE user_groups (
 );
 
 
--- User RSVPs to entries
-CREATE TABLE entry_rsvps (
-    user_id INTEGER REFERENCES users ON DELETE CASCADE,
-    entry_id INTEGER REFERENCES entries ON DELETE CASCADE,
-    status TEXT CHECK(status IN ('attending', 'maybe', 'declined')) NOT NULL DEFAULT 'declined',
-    PRIMARY KEY (user_id, entry_id)
+-- RSVPs table
+CREATE TABLE rsvps (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER REFERENCES users(id),
+    entry_id INTEGER REFERENCES entries(id),
+    status TEXT CHECK(status IN ('attending', 'maybe', 'not attending')),
+    UNIQUE(user_id, entry_id) -- Ensures a user can only RSVP once per event
 );
+
 
 -- Create default category
 INSERT INTO categories (id, name) VALUES (1, 'Uncategorized')
