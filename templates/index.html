@@ -23,7 +23,6 @@
   <p>
     <a href="/new_entry">New event</a>
   </p>
-  {%endif%}
   <p>
     <a href="/find_entry">Find event</a>
   </p>
@@ -33,6 +32,7 @@
   <p>
     <a href="/new_group">New group</a> <a href="/manage_groups">Manage groups</a>
   </p>
+  {%endif%}
   <h1>Upcoming Events</h1>
 
   {% for group_name, entries in grouped_entries.items() %}

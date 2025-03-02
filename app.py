@@ -154,19 +154,20 @@ def change_user_role():
 @app.route("/find_entry")
 def find_entry():
     query = request.args.get("query", "").strip()
-
-    
     group_ids = request.args.getlist("group_id")
     category_ids = request.args.getlist("category_id")
 
-    
+    # Convert IDs to integers
     group_ids = [int(g) for g in group_ids if g.isdigit()]
     category_ids = [int(c) for c in category_ids if c.isdigit()]
 
-    results = entries.find_entries(query, group_ids, category_ids)
+    user_id = session.get("user_id")
+
+    # Fetch only allowed entries
+    results = entries.find_entries(query, group_ids, category_ids, user_id)
 
     all_groups = groups.get_groups()
-    all_categories = db.query("SELECT * FROM categories")
+    all_categories = categories.get_categories()
 
     return render_template(
         "find_entry.html",
@@ -177,6 +178,7 @@ def find_entry():
         selected_groups=group_ids,
         selected_categories=category_ids
     )
+
 
     
 
@@ -364,29 +366,38 @@ def confirm_delete():
 
 @app.route("/register")
 def register():
+    if "user_id" in session:
+        return redirect("/")  # Redirect logged-in users to homepage
     return render_template("register.html")
+
 
 @app.route("/create", methods=["POST"])
 def create():
+    if "user_id" in session:
+        return redirect("/")  # Redirect logged-in users to homepage
+
     username = request.form["username"]
     password1 = request.form["password1"]
     password2 = request.form["password2"]
     
     if password1 != password2:
-        return "VIRHE: salasanat eivät ole samat"
-    
+        return "Error: Passwords do not match"
+
     try:
-        user_id = users.create_user(username, password1)  # Get the new user's ID
+        user_id = users.create_user(username, password1)
         session["user_id"] = user_id  # Automatically log in
         session["username"] = username
     except sqlite3.IntegrityError:
-        return "VIRHE: tunnus on jo varattu"
-    
+        return "Error: Username already taken"
+
     return redirect("/")
+
 
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
+    if "user_id" in session:
+        return redirect("/")
     if request.method == "GET":
         return render_template("login.html")
     if request.method == "POST":

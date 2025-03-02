@@ -46,6 +46,33 @@ This project is open-source and free to use under the **MIT License**.
 - **Moderator** role doesn't do anything special. It's just like member.
 - **Categories** cannot be deleted. This is because currently the category creator isn't logged and thus anyone could delete any category.
 
+## 🔐 User Permissions
+| Route | URL | Permissions Checked? |
+|--------|------|--------------------|
+| `index()` | `/` | ✅ Shows only public/group-allowed entries |
+| `show_entry(entry_id)` | `/entry/<int:entry_id>` | ✅ Public entries are viewable, private require login & group check |
+| `find_entry()` | `/find_entry` | ✅ Now ensures only public & user-allowed group entries are displayed |
+| `register()` | `/register` | ✅ Redirects logged-in users to homepage |
+| `create()` | `/create` | ✅ Prevents logged-in users from registering again |
+| `login()` | `/login` | ✅ Redirects logged-in users to homepage |
+| `logout()` | `/logout` | ✅ Only runs if logged in |
+| `show_user(user_id)` | `/user/<int:user_id>` | ✅ Publicly viewable, but shows only public data |
+| `new_entry()` | `/new_entry` | ✅ Requires login |
+| `create_entry()` | `/create_entry` | ✅ Requires login & verifies group permissions |
+| `edit_entry(entry_id)` | `/edit_entry/<int:entry_id>` | ✅ Requires login & user must own the entry |
+| `update_entry()` | `/update_entry` | ✅ Requires login & user must own the entry |
+| `delete_entry(entry_id)` | `/delete_entry/<int:entry_id>` | ✅ Requires login & user must own the entry |
+| `confirm_delete()` | `/confirm_delete` | ✅ Requires login & password confirmation |
+| `new_group()` | `/new_group` | ✅ Requires login |
+| `create_group()` | `/create_group` | ✅ Requires login |
+| `manage_groups()` | `/manage_groups` | ✅ Only group admins can access |
+| `add_user_to_group()` | `/add_user_to_group` | ✅ Only group admins can add users |
+| `remove_user_from_group()` | `/remove_user_from_group` | ✅ Only group admins can remove users |
+| `change_user_role()` | `/change_user_role` | ✅ Only group admins can change roles |
+| `new_category()` | `/new_category` | ✅ Requires login |
+| `create_category()` | `/create_category` | ✅ Requires login |
+| `rsvp()` | `/rsvp` | ✅ Requires login |
+
 ## ✅ Course requirement checklist
 
 ## Basic Requirements (7 points)
@@ -115,7 +142,7 @@ This project is open-source and free to use under the **MIT License**.
 ## Application Security (20 points)
 
 - [x] Passwords stored securely in the database (1 point)
-- [ ] User permissions checked before allowing access to pages (5 points)
+- [x] User permissions checked before allowing access to pages (5 points)
 - [ ] User permissions checked before allowing form submissions (5 points)
 - [ ] User inputs validated before being added to the database (3 points)
 - [x] SQL queries use parameterized queries to prevent SQL injection (2 points)
@@ -138,4 +165,5 @@ This project is open-source and free to use under the **MIT License**.
 
 
 ---
+
 
