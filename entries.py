@@ -147,3 +147,49 @@ def count_user_entries(user_id):
     sql = "SELECT COUNT(*) AS total FROM entries WHERE user_id = ?"
     result = db.query(sql, [user_id])
     return result[0]["total"] if result else 0
+
+def get_entry_count(user_id=None):
+    if user_id:
+        sql = """SELECT COUNT(*) FROM entries e
+                 LEFT JOIN entry_groups eg ON e.id = eg.entry_id
+                 WHERE e.user_id = ? OR eg.group_id IN 
+                     (SELECT group_id FROM user_groups WHERE user_id = ?)"""
+        result = db.query(sql, [user_id, user_id])
+    else:
+        sql = "SELECT COUNT(*) FROM entries WHERE id NOT IN (SELECT entry_id FROM entry_groups)"
+        result = db.query(sql)
+
+    return result[0]["COUNT(*)"] if result else 0
+
+def get_entries_paginated(user_id, page, page_size):
+    offset = (page - 1) * page_size
+    params = [page_size, offset]
+
+    if user_id:
+        sql = """SELECT e.id, e.title, e.date, e.time, e.duration, 
+                        u.username, c.name AS category_name, g.name AS group_name
+                 FROM entries e
+                 JOIN users u ON e.user_id = u.id
+                 LEFT JOIN categories c ON e.category_id = c.id
+                 LEFT JOIN entry_groups eg ON e.id = eg.entry_id
+                 LEFT JOIN groups g ON eg.group_id = g.id
+                 WHERE e.user_id = ? OR eg.group_id IN 
+                     (SELECT group_id FROM user_groups WHERE user_id = ?)
+                 GROUP BY e.id
+                 ORDER BY e.date ASC, e.time ASC
+                 LIMIT ? OFFSET ?"""
+        params = [user_id, user_id] + params
+    else:
+        sql = """SELECT e.id, e.title, e.date, e.time, e.duration, 
+                        u.username, c.name AS category_name, g.name AS group_name
+                 FROM entries e
+                 JOIN users u ON e.user_id = u.id
+                 LEFT JOIN categories c ON e.category_id = c.id
+                 LEFT JOIN entry_groups eg ON e.id = eg.entry_id
+                 LEFT JOIN groups g ON eg.group_id = g.id
+                 WHERE e.id NOT IN (SELECT entry_id FROM entry_groups)
+                 GROUP BY e.id
+                 ORDER BY e.date ASC, e.time ASC
+                 LIMIT ? OFFSET ?"""
+
+    return db.query(sql, params)

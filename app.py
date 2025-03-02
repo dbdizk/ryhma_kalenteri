@@ -1,5 +1,5 @@
 import sqlite3
-from flask import Flask
+from flask import Flask, g
 from flask import abort, redirect, render_template, request, session
 from markupsafe import Markup
 import secrets
@@ -11,10 +11,25 @@ import categories
 import groups
 import rsvps
 import re
+import math
+import time
 
 
 app = Flask(__name__)
 app.secret_key = config.secret_key
+
+
+
+@app.before_request
+def before_request():
+    g.start_time = time.time()
+
+@app.after_request
+def after_request(response):
+    elapsed_time = round(time.time() - g.start_time, 2)
+    print("elapsed time:", elapsed_time, "s")
+    return response
+
 
 # Check if user is logged in
 def check_login():
@@ -34,29 +49,46 @@ def nl2br_filter(text):
         return ""
     return Markup(text.replace("\n", "<br>"))
 
-# Index route
 @app.route("/")
-def index():
+@app.route("/page/<int:page>")
+def index(page=1):
     user_id = session.get("user_id")
+    page_size = 10  # Number of entries per page
+    entry_count = entries.get_entry_count(user_id)  # Get total entry count for the user
+    page_count = math.ceil(entry_count / page_size)  # Calculate total pages
+    page_count = max(page_count, 1)  # Ensure at least 1 page exists
 
-    # Fetch events
-    all_entries = entries.get_entries(user_id)
+    # Redirect if page number is out of bounds
+    if page < 1:
+        return redirect("/page/1")
+    if page > page_count:
+        return redirect(f"/page/{page_count}")
+
+    # Fetch paginated entries for the user
+    paginated_entries = entries.get_entries_paginated(user_id, page, page_size)
 
     # Fetch RSVP statuses if logged in
     user_rsvp_status = {}
     if user_id:
-        for entry in all_entries:
+        for entry in paginated_entries:
             user_rsvp_status[entry["id"]] = rsvps.get_user_rsvp(user_id, entry["id"])
 
     # Organize entries by group
     grouped_entries = {}
-    for entry in all_entries:
+    for entry in paginated_entries:
         group_name = entry["group_name"] if entry["group_name"] else "Public Events"
         if group_name not in grouped_entries:
             grouped_entries[group_name] = []
         grouped_entries[group_name].append(entry)
 
-    return render_template("index.html", grouped_entries=grouped_entries, user_rsvp_status=user_rsvp_status)
+    return render_template(
+        "index.html",
+        grouped_entries=grouped_entries,
+        user_rsvp_status=user_rsvp_status,
+        page=page,
+        page_count=page_count
+    )
+
 
 
 # User profile route

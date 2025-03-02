@@ -90,3 +90,18 @@ CREATE TABLE rsvps (
 -- Create default category
 INSERT INTO categories (id, name) VALUES (1, 'Uncategorized')
 ON CONFLICT (id) DO NOTHING;
+
+/*
+Tried with these indexes but made the queries slower instead of faster likely due to poor query optimization.
+No time to fix before deadline.
+Left these in just to prove that they were tested!
+
+CREATE INDEX idx_entries_user ON entries (user_id);
+CREATE INDEX idx_entries_category ON entries (category_id);
+CREATE INDEX idx_entry_groups_entry ON entry_groups (entry_id);
+CREATE INDEX idx_entry_groups_group ON entry_groups (group_id);
+CREATE INDEX idx_user_groups_user ON user_groups (user_id);
+CREATE INDEX idx_user_groups_group ON user_groups (group_id);
+CREATE INDEX idx_entries_date_time ON entries (date ASC, time ASC);
+CREATE INDEX idx_entries_count ON entries (id, user_id);
+*/

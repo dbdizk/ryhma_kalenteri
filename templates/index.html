@@ -52,6 +52,18 @@
           {% endfor %}
       </ul>
   {% endfor %}
+  <div class="pagination">
+    {% if page > 1 %}
+        <a href="/page/{{ page - 1 }}" class="btn">⬅ Previous</a>
+    {% endif %}
+
+    <span>Page {{ page }} of {{ page_count }}</span>
+
+    {% if page < page_count %}
+        <a href="/page/{{ page + 1 }}" class="btn">Next ➡</a>
+    {% endif %}
+</div>
+
   
   
 </body>
