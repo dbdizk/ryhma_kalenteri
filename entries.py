@@ -44,6 +44,14 @@ def get_public_entries():
              ORDER BY e.date ASC"""
     return db.query(sql)
 
+def get_entries_by_group(group_id):
+    sql = """SELECT e.id, e.title, e.date, e.time, u.username 
+             FROM entries e
+             JOIN users u ON e.user_id = u.id
+             JOIN entry_groups eg ON e.id = eg.entry_id
+             WHERE eg.group_id = ?
+             ORDER BY e.date ASC, e.time ASC"""
+    return db.query(sql, [group_id])
 
 
 def get_entry(entry_id):
@@ -124,3 +132,8 @@ def get_entry_groups(entry_id):
              JOIN entry_groups eg ON g.id = eg.group_id
              WHERE eg.entry_id = ?"""
     return db.query(sql, [entry_id])
+
+def count_user_entries(user_id):
+    sql = "SELECT COUNT(*) AS total FROM entries WHERE user_id = ?"
+    result = db.query(sql, [user_id])
+    return result[0]["total"] if result else 0

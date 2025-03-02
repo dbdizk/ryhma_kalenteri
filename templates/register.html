@@ -2,24 +2,24 @@
 <html>
 
 <head>
-  <title>Rekisteröinti</title>
+  <title>Registration</title>
 </head>
 
 <body>
   <form action="/create" method="post">
     <p>
-      Tunnus: <br />
-      <input type="text" name="username" />
+      Username: *<br />
+      <input type="text" name="username" required />
     </p>
     <p>
-      Salasana: <br />
-      <input type="password" name="password1" />
+      Password: *<br />
+      <input type="password" name="password1" required />
     </p>
     <p>
-      Salasana uudestaan: <br />
-      <input type="password" name="password2" />
+      Enter password again: *<br />
+      <input type="password" name="password2" required />
     </p>
-    <input type="submit" value="Luo tunnus" />
+    <input type="submit" value="Register" />
   </form>
 </body>
 

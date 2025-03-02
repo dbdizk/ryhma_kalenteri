@@ -6,22 +6,29 @@
     <title>{{ user.username }}</title>
 </head>
 <body>
-    <header>
-        <h1>User Details</h1>
-    </header>
-    <main>
-        <p>
-            The user has {{ entries | count }} entries.
-        </p>
-        <h2>
-            Entries
-            <ul>
-                {% for entry in entries %}
-                <li><a href="/entry/{{entry.id}}">{{entry.title}}</a></li>
-                {% endfor %}
-            </ul>
-        </h2>
-        <a href="/">Back to Main Page</a>
-    </main>
+    <h1>{{ user.username }}'s Profile</h1>
+
+    <p><strong>Total Entries:</strong> {{ total_entries }}</p>
+    
+    <h2>Groups</h2>
+    {% if user_groups %}
+        <ul>
+            {% for group in user_groups %}
+                <li>
+                    <a href="/group/{{ group.id }}">{{ group.name }}</a> - <strong>{{ group.role_name }}</strong>
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>This user is not part of any groups.</p>
+    {% endif %}
+    
+    <h2>Entries Created</h2>
+    <ul>
+        {% for entry in entries %}
+            <li><a href="/entry/{{ entry.id }}">{{ entry.title }}</a></li>
+        {% endfor %}
+    </ul>
+    <a href="/">Back to Main Page</a>
 </body>
 </html>

@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Group Calendar</title>
+    <link rel="stylesheet" href="/static/css/styles.css">
+</head>
+<body>
+    <h1>{{ group.name }}</h1>
+    <p>{{ group.description }}</p>
+    
+    <h2>Members</h2>
+    {% if members %}
+        <ul>
+            {% for member in members %}
+                <li>
+                    <a href="/user/{{ member.id }}">{{ member.username }}</a> - <strong>{{ member.role }}</strong>
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>No members in this group.</p>
+    {% endif %}
+    
+    <h2>Events</h2>
+    {% if entries %}
+        <ul>
+            {% for entry in entries %}
+                <li>
+                    <a href="/entry/{{ entry.id }}">{{ entry.title }}</a> - {{ entry.date }} at {{ entry.time }} (Created by {{ entry.username }})
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>No events in this group.</p>
+    {% endif %}    
+</body>
+</html>

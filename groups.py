@@ -100,8 +100,10 @@ def change_user_role(user_id, group_id, new_role):
     db.execute(sql, [new_role, user_id, group_id])
 
 def get_user_groups(user_id):
-    sql = """SELECT g.id, g.name FROM groups g
+    sql = """SELECT g.id, g.name, r.name AS role_name
+             FROM groups g
              JOIN user_groups ug ON g.id = ug.group_id
+             JOIN roles r ON ug.role_id = r.id
              WHERE ug.user_id = ?"""
     return db.query(sql, [user_id])
 
@@ -114,6 +116,6 @@ def get_user_group_ids(user_id):
 
     print(f"DEBUG: User {user_id} is in groups: {group_ids}")  # Updated debug
 
-    return group_ids  # ✅ Now correctly returns a list of integers
+    return group_ids  
 
 

@@ -47,8 +47,19 @@ def show_user(user_id):
     user = users.get_user(user_id)
     if not user:
         abort(404)
-    entries = users.get_entries(user_id)
-    return render_template("show_user.html", user=user, entries=entries)
+
+    user_entries = users.get_entries(user_id)
+    total_entries = entries.count_user_entries(user_id) # This exists just because week 3 feedback told to use aggregate functions
+    user_groups = groups.get_user_groups(user_id)
+
+    return render_template(
+        "show_user.html",
+        user=user,
+        entries=user_entries,
+        total_entries=total_entries,
+        user_groups=user_groups
+    )
+
 
 @app.route("/rsvp", methods=["POST"])
 def rsvp():
@@ -67,6 +78,19 @@ def rsvp():
 
     return redirect(f"/entry/{entry_id}")
 
+@app.route("/group/<int:group_id>")
+def show_group(group_id):
+    group = groups.get_group(group_id)
+    if not group:
+        abort(404)
+
+    # Fetch group members and their roles
+    group_members = users.get_users_in_group_with_roles(group_id)
+
+    # Fetch entries associated with the group
+    group_entries = entries.get_entries_by_group(group_id)
+
+    return render_template("show_group.html", group=group, members=group_members, entries=group_entries)
 
 @app.route("/manage_groups")
 def manage_groups():

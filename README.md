@@ -81,7 +81,7 @@ This project is open-source and free to use under the **MIT License**.
 - [x] User can add, edit, and delete data items (1 point)
 - [x] User can view the added data items in the application (1 point)
 - [x] User can search for data items by keyword or other criteria (1 point)
-- [ ] User's page displays statistics and the user's added data items (1 point)
+- [x] User's page displays statistics and the user's added data items (1 point)
 - [x] User can assign one or more categories to a data item (1 point)
 - [x] User can submit additional information to a data item (1 point)
 
@@ -117,7 +117,7 @@ This project is open-source and free to use under the **MIT License**.
 
 - [x] General code quality (clarity, readability, and style) (5 points)
 - [x] Indentation level is four spaces (1 point)
-- [ ] Code written in English (1 point)
+- [x] Code written in English (1 point)
 - [x] Variable and function names in snake_case (e.g., `total_count`, not `totalCount`) (1 point)
 - [ ] Consistent use of single or double quotes for strings (1 point)
 - [ ] Proper spacing around assignment (`=`) and comparison (`==`) operators (1 point)
