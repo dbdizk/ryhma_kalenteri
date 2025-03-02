@@ -9,13 +9,15 @@ def add_entry(title, description, date, time, duration, user_id, category_id):
 
 
 
-def get_entries(user_id):
+def get_entries(user_id=None):
     sql = """SELECT e.id, e.title, e.description, e.date, e.time, e.duration, 
-                    u.username, c.name AS category_name
+                    u.username, c.name AS category_name, 
+                    g.name AS group_name, g.id AS group_id
              FROM entries e
              JOIN users u ON e.user_id = u.id
              LEFT JOIN categories c ON e.category_id = c.id
              LEFT JOIN entry_groups eg ON e.id = eg.entry_id
+             LEFT JOIN groups g ON eg.group_id = g.id
              WHERE e.id IN (
                 SELECT e.id FROM entries e
                 LEFT JOIN entry_groups eg ON e.id = eg.entry_id
@@ -23,8 +25,12 @@ def get_entries(user_id):
                     SELECT group_id FROM user_groups WHERE user_id = ?
                 )
              )
-             GROUP BY e.id ORDER BY e.date DESC"""
-    return db.query(sql, [user_id])
+             ORDER BY g.name ASC NULLS FIRST, e.date ASC, e.time ASC"""
+
+    return db.query(sql, [user_id] if user_id is not None else [None])
+
+
+
 
 def get_public_entries():
     sql = """SELECT e.id, e.title, e.description, e.date, e.time, e.duration, 

@@ -25,34 +25,48 @@
             <p><strong>Time:</strong> {{ entry.time }}</p>
             <p><strong>Duration:</strong> {{ entry.duration }}</p>
             <p><strong>Description:</strong> {{ entry.description }}</p>
-            <p><strong>Creator:</strong> <a href="/user/{{entry.user_id}}"> {{ entry.username }}</a></p>
-            <p><h3>Assigned Groups:</h3>
+        </article>
+        {% if entry_groups %}
+            <p><strong>Groups:</strong>
+                {% for group in entry_groups %}
+                    {{ group.name }}{% if not loop.last %}, {% endif %}
+                {% endfor %}
+            </p>
+        {% endif %}
+
+        <!-- Show event owner link only if logged in -->
+        {% if "user_id" in session %}
+            <p><strong>Created by:</strong> <a href="/user/{{ entry.user_id }}">{{ entry.username }}</a></p>
+        {% else %}
+            <p><strong>Created by:</strong> {{ entry.username }}</p>
+        {% endif %}
+
+        <!-- Show RSVP section only if logged in -->
+        {% if "user_id" in session %}
+            <h2>RSVP to This Event</h2>
+            <form action="/rsvp" method="post">
+                <input type="hidden" name="entry_id" value="{{ entry.id }}">
+
+                <button type="submit" name="status" value="attending"
+                    {% if user_rsvp == 'attending' %}disabled{% endif %}>Attending</button>
+
+                <button type="submit" name="status" value="maybe"
+                    {% if user_rsvp == 'maybe' %}disabled{% endif %}>Maybe</button>
+
+                <button type="submit" name="status" value="not attending"
+                    {% if user_rsvp == 'not attending' %}disabled{% endif %}>Not Attending</button>
+            </form>
+                <!-- Display RSVPs -->
+                <h2>RSVP Responses</h2>
                 <ul>
-                    {% for group in entry_groups %}
-                        <li>{{ group.name }}</li>
+                    {% for rsvp in event_rsvps %}
+                        <li>{{ rsvp.username }} - {{ rsvp.status }}</li>
                     {% endfor %}
                 </ul>
-            </p>
-        </article>
-        <h2>RSVP to This Event</h2>
-        <form action="/rsvp" method="post">
-            <input type="hidden" name="entry_id" value="{{ entry.id }}">
-            
-            <button type="submit" name="status" value="attending"
-                {% if user_rsvp == 'attending' %}disabled{% endif %}>Attending</button>
+        {% endif %}
 
-            <button type="submit" name="status" value="maybe"
-                {% if user_rsvp == 'maybe' %}disabled{% endif %}>Maybe</button>
 
-            <button type="submit" name="status" value="not attending"
-                {% if user_rsvp == 'not attending' %}disabled{% endif %}>Not Attending</button>
-        </form>
-        <h2>RSVP Responses</h2>
-        <ul>
-            {% for rsvp in event_rsvps %}
-                <li>{{ rsvp.username }} - {{ rsvp.status }}</li>
-            {% endfor %}
-        </ul>
+
 
 
         <a href="/">Back to Main Page</a>

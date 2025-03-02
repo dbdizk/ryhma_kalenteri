@@ -33,12 +33,27 @@
   <p>
     <a href="/new_group">New group</a> <a href="/manage_groups">Manage groups</a>
   </p>
-  <h2>Events</h2>
-  <ul>
-    {% for entry in entries %}
-    <li><a href="/entry/{{ entry.id }}">{{ entry.title }}</a></li>
-    {% endfor %}
-  </ul>
+  <h1>Upcoming Events</h1>
+
+  {% for group_name, entries in grouped_entries.items() %}
+      <h2>{{ group_name }}</h2>
+      <ul>
+          {% for entry in entries %}
+              <li>
+                  <strong>{{ entry.title }}</strong> 
+                  - {{ entry.date }} at {{ entry.time }}
+  
+                  {% if user_rsvp_status and entry.id in user_rsvp_status %}
+                      (Your RSVP: {{ user_rsvp_status[entry.id] or "Not Responded" }})
+                  {% endif %}
+  
+                  <a href="/entry/{{ entry.id }}">View Details</a>
+              </li>
+          {% endfor %}
+      </ul>
+  {% endfor %}
+  
+  
 </body>
 
 </html>

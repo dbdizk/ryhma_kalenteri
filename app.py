@@ -19,12 +19,27 @@ def check_login():
 
 @app.route("/")
 def index():
-    if "user_id" in session:
-        all_entries = entries.get_entries(session["user_id"])
-    else:
-        all_entries = entries.get_public_entries()  # Fetch only ungrouped events for guests
+    user_id = session.get("user_id")
 
-    return render_template("index.html", entries=all_entries)
+    # Fetch events
+    all_entries = entries.get_entries(user_id)
+
+    # Fetch RSVP statuses if logged in
+    user_rsvp_status = {}
+    if user_id:
+        for entry in all_entries:
+            user_rsvp_status[entry["id"]] = rsvps.get_user_rsvp(user_id, entry["id"])
+
+    # Organize entries by group
+    grouped_entries = {}
+    for entry in all_entries:
+        group_name = entry["group_name"] if entry["group_name"] else "Public Events"
+        if group_name not in grouped_entries:
+            grouped_entries[group_name] = []
+        grouped_entries[group_name].append(entry)
+
+    return render_template("index.html", grouped_entries=grouped_entries, user_rsvp_status=user_rsvp_status)
+
 
 
 @app.route("/user/<int:user_id>")
@@ -167,32 +182,37 @@ def find_entry():
 
 @app.route("/entry/<int:entry_id>")
 def show_entry(entry_id):
-    check_login()
-    user_id = session["user_id"]
-
     entry = entries.get_entry(entry_id)
     if not entry:
         abort(404)
 
     entry_groups = entries.get_entry_groups(entry_id)
 
-    # If the entry is assigned to groups, check if the user is in one of them
+    # If the event has groups, enforce access restrictions
     if entry_groups:
+        if "user_id" not in session:  # Require login for group events
+            return "Error: You must be logged in to view this entry", 403
+
+        user_id = session["user_id"]
         user_group_ids = set(groups.get_user_group_ids(user_id))
         entry_group_ids = {group["id"] for group in entry_groups}
 
         print(f"DEBUG: Entry {entry_id} is in groups: {entry_group_ids}")
         print(f"DEBUG: User {user_id} is in groups: {user_group_ids}")
 
-        # If the user is NOT in any of the entry's groups, deny access
+        # If the user is not in any of the entry’s groups, deny access
         if not entry_group_ids.intersection(user_group_ids):
-            return "Error: You do not have permission to view this entry <br> <a href='/'>Return to main page</a>", 403
+            return "Error: You do not have permission to view this entry", 403
 
-    # Fetch RSVP details
-    user_rsvp = rsvps.get_user_rsvp(user_id, entry_id)
-    event_rsvps = rsvps.get_event_rsvps(entry_id)
+    # Fetch RSVP details if logged in
+    user_rsvp = None
+    event_rsvps = []
+    if "user_id" in session:
+        user_rsvp = rsvps.get_user_rsvp(session["user_id"], entry_id)
+        event_rsvps = rsvps.get_event_rsvps(entry_id)
 
     return render_template("show_entry.html", entry=entry, entry_groups=entry_groups, user_rsvp=user_rsvp, event_rsvps=event_rsvps)
+
 
 
 
