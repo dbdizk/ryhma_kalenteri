@@ -38,7 +38,7 @@ def manage_groups():
     admin_groups = groups.get_admin_groups(user_id)
 
     if not admin_groups:
-        return "Error: You are not an admin of any group"
+        return "Error: You are not an admin of any group <br> <a href='/'>Return to main page</a>"
 
     all_users = users.get_all_users()
 
@@ -60,14 +60,55 @@ def add_user_to_group():
 
     # Ensure both user and group exist
     if not users.get_user(user_id):
-        return "Error: User does not exist"
+        return "Error: User does not exist <br> <a href='/manage_groups'>Return to group management</a>"
     if not groups.get_group(group_id):
-        return "Error: Group does not exist"
+        return "Error: Group does not exist <br> <a href='/manage_groups'>Return to group management</a>"
 
     # Add user to group
     result = groups.add_user_to_group(user_id, group_id)
 
     return redirect("/manage_groups")
+
+@app.route("/remove_user_from_group", methods=["POST"])
+def remove_user_from_group():
+    check_login()
+    admin_id = session["user_id"]
+    user_id = request.form["user_id"]
+    group_id = request.form["group_id"]
+
+    # Ensure the admin has permission to remove users
+    if not groups.is_user_admin(admin_id, group_id):
+        return "Error: You do not have permission to remove members from this group <br> <a href='/'>Return to main page</a>"
+
+    # Prevent admins from removing themselves
+    if admin_id == user_id:
+        return "Error: Admins cannot remove themselves <br> <a href='/manage_groups'>Return to group management</a>"
+
+    groups.remove_user_from_group(user_id, group_id)
+
+    return redirect("/manage_groups")
+
+@app.route("/change_user_role", methods=["POST"])
+def change_user_role():
+    check_login()
+    admin_id = session["user_id"]
+    user_id = request.form["user_id"]
+    group_id = request.form["group_id"]
+    new_role = request.form["new_role"]
+
+    # Ensure the admin has permission to change roles
+    if not groups.is_user_admin(admin_id, group_id):
+        return "Error: You do not have permission to change roles in this group <br> <a href='/'Return to main page</a>"
+
+    # Prevent users from changing their own role
+    if admin_id == int(user_id):
+        return "Error: You cannot change your own role <br> <a href='/manage_groups'>Return to group management</a>"
+
+    groups.change_user_role(user_id, group_id, new_role)
+
+    return redirect("/manage_groups")
+
+
 
 
 
@@ -123,16 +164,15 @@ def create_group():
     
     name = request.form["group_name"]
     description = request.form["description"]
-    creator_id = session["user_id"]  # Get the ID of the logged-in user
+    creator_id = session["user_id"]
 
-    # Validate input length
     if not name or len(name) > 50:
         abort(403)
     if not description or len(description) > 1000:
         abort(403)
 
     try:
-        group_id = groups.add_group(name, description, creator_id)  # ✅ Pass creator_id here
+        group_id = groups.add_group(name, description, creator_id)
     except sqlite3.IntegrityError:
         return "ERROR: Group already exists <br> <a href='/'>Return to main page</a>"
 

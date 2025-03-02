@@ -90,3 +90,12 @@ def add_user_to_group(user_id, group_id):
     sql = "INSERT INTO user_groups (user_id, group_id, role_id) VALUES (?, ?, 3)"
     db.execute(sql, [user_id, group_id])
     return "User added to group successfully"
+
+def remove_user_from_group(user_id, group_id):
+    sql = "DELETE FROM user_groups WHERE user_id = ? AND group_id = ?"
+    db.execute(sql, [user_id, group_id])
+
+def change_user_role(user_id, group_id, new_role):
+    sql = "UPDATE user_groups SET role_id = ? WHERE user_id = ? AND group_id = ?"
+    db.execute(sql, [new_role, user_id, group_id])
+
