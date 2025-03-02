@@ -45,6 +45,9 @@ This project is open-source and free to use under the **MIT License**.
 ## ❌ Current known nuances that won't be fixed due to limited time window before deadline
 - **Moderator** role doesn't do anything special. It's just like member.
 - **Categories** cannot be deleted/edited. This is because currently the category creator isn't logged and thus anyone could delete/edit any category.
+- **Styling** sucks. I'm not a designer. But it's there and it's CSS!
+- **No labels** in all forms. Only 1 point and I'm too lazy to fix.
+- **Errors** not handled on a single page. Not a part of the course requirements but there was a note about it in week 3 review.
 
 ## 🔐 Page User Permissions
 | Route | URL | Permissions Checked? |
@@ -176,10 +179,10 @@ All critical form submissions are protected against **Cross-Site Request Forgery
 
 ## Functionality and Usability (15 points)
 
-- [ ] User experience with the functionality of the application (5 points)
-- [ ] User experience with the usability of the application (5 points)
+- [?] User experience with the functionality of the application (5 points)
+- [?] User experience with the usability of the application (5 points)
 - [ ] Line breaks in user-submitted text are visible in the browser (1 point)
-- [ ] Alt attribute used for images (if images are present) (1 point)
+- [x] Alt attribute used for images (if images are present) (1 point)
 - [-] Label element used in forms (1 point) - Too lazy to do this
 - [x] CSS used for layout and styling (2 points)
 

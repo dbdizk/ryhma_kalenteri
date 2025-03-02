@@ -1,6 +1,7 @@
 import sqlite3
 from flask import Flask
 from flask import abort, redirect, render_template, request, session
+from markupsafe import Markup
 import secrets
 import config
 import db
@@ -22,6 +23,14 @@ def check_login():
 def check_csrf():
     if request.form["csrf_token"] != session["csrf_token"]:
         abort(403)
+
+@app.template_filter('nl2br')
+def nl2br_filter(text):
+    """ Converts newlines (\n) to <br> tags for HTML rendering """
+    if text is None:
+        return ""
+    return Markup(text.replace("\n", "<br>"))
+
 
 @app.route("/")
 def index():

@@ -8,7 +8,7 @@
 </head>
 <body>
     <h1>{{ group.name }}</h1>
-    <p>{{ group.description }}</p>
+    <p>{{ group.description | nl2br }}</p>
     
     <h2>Members</h2>
     {% if members %}

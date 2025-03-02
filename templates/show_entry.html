@@ -25,7 +25,7 @@
             <p><strong>Date:</strong> {{ entry.date }}</p>
             <p><strong>Time:</strong> {{ entry.time }}</p>
             <p><strong>Duration:</strong> {{ entry.duration }}</p>
-            <p><strong>Description:</strong> {{ entry.description }}</p>
+            <p><strong>Description:</strong> {{ entry.description | nl2br }}</p>
         </article>
         {% if entry_groups %}
             <p><strong>Groups:</strong>
