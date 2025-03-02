@@ -84,14 +84,14 @@ def delete_entry(entry_id):
     sql = "DELETE FROM entries WHERE id = ?"
     db.execute(sql, [entry_id])
 
-def find_entries(query=None, group_ids=None, category_ids=None):
+def find_entries(query=None, group_ids=None, category_ids=None, user_id=None):
     sql = """SELECT e.id, e.title, e.description, e.date, e.time, e.duration, 
                     u.username, c.name AS category_name 
              FROM entries e
              JOIN users u ON e.user_id = u.id
              LEFT JOIN categories c ON e.category_id = c.id
              LEFT JOIN entry_groups eg ON e.id = eg.entry_id
-             WHERE 1=1 """  # Always true, allows dynamic conditions
+             WHERE 1=1 """  # Always true to allow dynamic conditions
 
     params = []
 
@@ -110,9 +110,19 @@ def find_entries(query=None, group_ids=None, category_ids=None):
         sql += f" AND e.category_id IN ({placeholders})"
         params.extend(category_ids)
 
-    sql += " GROUP BY e.id ORDER BY e.date DESC"
+    # Filter by user group access (only return entries from groups the user belongs to)
+    if user_id:
+        sql += """ AND (
+            e.user_id = ? OR 
+            e.id IN (SELECT entry_id FROM entry_groups WHERE group_id IN 
+                     (SELECT group_id FROM user_groups WHERE user_id = ?))
+        )"""
+        params.extend([user_id, user_id])
+
+    sql += " GROUP BY e.id ORDER BY e.date ASC"
 
     return db.query(sql, params)
+
 
 
 

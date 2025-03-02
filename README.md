@@ -44,7 +44,7 @@ This project is open-source and free to use under the **MIT License**.
 
 ## ❌ Current known nuances that won't be fixed due to limited time window before deadline
 - **Moderator** role doesn't do anything special. It's just like member.
-- **Categories** cannot be deleted. This is because currently the category creator isn't logged and thus anyone could delete any category.
+- **Categories** cannot be deleted/edited. This is because currently the category creator isn't logged and thus anyone could delete/edit any category.
 
 ## 🔐 Page User Permissions
 | Route | URL | Permissions Checked? |
@@ -180,8 +180,8 @@ All critical form submissions are protected against **Cross-Site Request Forgery
 - [ ] User experience with the usability of the application (5 points)
 - [ ] Line breaks in user-submitted text are visible in the browser (1 point)
 - [ ] Alt attribute used for images (if images are present) (1 point)
-- [ ] Label element used in forms (1 point)
-- [ ] CSS used for layout and styling (2 points)
+- [-] Label element used in forms (1 point) - Too lazy to do this
+- [x] CSS used for layout and styling (2 points)
 
 ## Version Control (10 points)
 

@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Manage Groups</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
 
@@ -11,6 +12,7 @@
 
 <h2>Add User to Group</h2>
 <form action="/add_user_to_group" method="post">
+    <input type="hidden" name="csrf_token" value="{{ session.csrf_token }}" />
     <label>Select User:</label>
     <select name="user_id">
         {% for user in users %}
@@ -29,41 +31,47 @@
 </form>
 
 <h2>Current Group Members</h2>
+
 {% for group in groups %}
     <h3>{{ group.name }}</h3>
-    <ul>
+    <div class="group-members">
         {% if group.members %}
             {% for member in group.members %}
-                <li>
-                    {{ member.username }} - Current Role: {{ member.role }}
+                <div class="member-item">
+                    <span class="member-info">
+                        {{ member.username }} - <strong>Role:</strong> {{ member.role }}
+                    </span>
 
-                    <!-- Change Role Form -->
-                    <form action="/change_user_role" method="post" style="display:inline;">
-                        <input type="hidden" name="csrf_token" value="{{ session.csrf_token }}" />
-                        <input type="hidden" name="user_id" value="{{ member.id }}">
-                        <input type="hidden" name="group_id" value="{{ group.id }}">
-                        <select name="new_role">
-                            <option value="1" {% if member.role == 'admin' %}selected{% endif %}>Admin</option>
-                            <option value="2" {% if member.role == 'moderator' %}selected{% endif %}>Moderator</option>
-                            <option value="3" {% if member.role == 'member' %}selected{% endif %}>Member</option>
-                        </select>
-                        <input type="submit" value="Change Role">
-                    </form>
+                    <div class="member-actions">
+                        <!-- Change Role Form -->
+                        <form action="/change_user_role" method="post">
+                            <input type="hidden" name="csrf_token" value="{{ session.csrf_token }}" />
+                            <input type="hidden" name="user_id" value="{{ member.id }}">
+                            <input type="hidden" name="group_id" value="{{ group.id }}">
+                            <select name="new_role" class="role-select">
+                                <option value="1" {% if member.role == 'admin' %}selected{% endif %}>Admin</option>
+                                <option value="2" {% if member.role == 'moderator' %}selected{% endif %}>Moderator</option>
+                                <option value="3" {% if member.role == 'member' %}selected{% endif %}>Member</option>
+                            </select>
+                            <input type="submit" value="Change Role" class="role-btn">
+                        </form>
 
-                    <!-- Remove Member Form -->
-                    <form action="/remove_user_from_group" method="post" style="display:inline;">
-                        <input type="hidden" name="csrf_token" value="{{ session.csrf_token }}" />
-                        <input type="hidden" name="user_id" value="{{ member.id }}">
-                        <input type="hidden" name="group_id" value="{{ group.id }}">
-                        <input type="submit" value="Remove Member">
-                    </form>
-                </li>
+                        <!-- Remove Member Form -->
+                        <form action="/remove_user_from_group" method="post">
+                            <input type="hidden" name="csrf_token" value="{{ session.csrf_token }}" />
+                            <input type="hidden" name="user_id" value="{{ member.id }}">
+                            <input type="hidden" name="group_id" value="{{ group.id }}">
+                            <input type="submit" value="Remove" class="remove-btn">
+                        </form>
+                    </div>
+                </div>
             {% endfor %}
         {% else %}
-            <li>No members in this group</li>
+            <div class="no-members">No members in this group</div>
         {% endif %}
-    </ul>
+    </div>
 {% endfor %}
+
 
 
 
