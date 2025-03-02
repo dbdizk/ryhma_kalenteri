@@ -46,7 +46,7 @@ This project is open-source and free to use under the **MIT License**.
 - **Moderator** role doesn't do anything special. It's just like member.
 - **Categories** cannot be deleted. This is because currently the category creator isn't logged and thus anyone could delete any category.
 
-## 🔐 User Permissions
+## 🔐 Page User Permissions
 | Route | URL | Permissions Checked? |
 |--------|------|--------------------|
 | `index()` | `/` | ✅ Shows only public/group-allowed entries |
@@ -65,6 +65,7 @@ This project is open-source and free to use under the **MIT License**.
 | `confirm_delete()` | `/confirm_delete` | ✅ Requires login & password confirmation |
 | `new_group()` | `/new_group` | ✅ Requires login |
 | `create_group()` | `/create_group` | ✅ Requires login |
+| `show_group()` | `/group/<int:group_id>` | ✅ Requires login and being a member of said group|
 | `manage_groups()` | `/manage_groups` | ✅ Only group admins can access |
 | `add_user_to_group()` | `/add_user_to_group` | ✅ Only group admins can add users |
 | `remove_user_from_group()` | `/remove_user_from_group` | ✅ Only group admins can remove users |
@@ -72,6 +73,43 @@ This project is open-source and free to use under the **MIT License**.
 | `new_category()` | `/new_category` | ✅ Requires login |
 | `create_category()` | `/create_category` | ✅ Requires login |
 | `rsvp()` | `/rsvp` | ✅ Requires login |
+
+
+## 🔐 Form Permission Checks
+
+### **User Authentication Forms**
+| Form | URL | Method | Permission Check? |
+|------|------|--------|------------------|
+| **Register** | `/create` | `POST` | ✅ **Prevents logged-in users from re-registering** |
+| **Login** | `/login` | `POST` | ✅ **Anyone can log in** |
+| **Logout** | `/logout` | `GET` | ✅ **Only logs out if logged in** |
+
+### **Entry Forms**
+| Form | URL | Method | Permission Check? |
+|------|------|--------|------------------|
+| **Create Entry** | `/create_entry` | `POST` | ✅ **User must be logged in & can only assign groups they belong to** |
+| **Edit Entry** | `/update_entry` | `POST` | ✅ **User must be logged in & must own the entry** |
+| **Delete Entry** | `/confirm_delete` | `POST` | ✅ **User must own the entry & confirm password** |
+
+### **Group Management Forms**
+| Form | URL | Method | Permission Check? |
+|------|------|--------|------------------|
+| **Create Group** | `/create_group` | `POST` | ✅ **User must be logged in** |
+| **Add User to Group** | `/add_user_to_group` | `POST` | ✅ **Only group admins can submit** |
+| **Remove User from Group** | `/remove_user_from_group` | `POST` | ✅ **Only group admins can submit** |
+| **Change User Role in Group** | `/change_user_role` | `POST` | ✅ **Only group admins can submit & can’t change their own role** |
+
+### **Category Management Forms**
+| Form | URL | Method | Permission Check? |
+|------|------|--------|------------------|
+| **Create Category** | `/create_category` | `POST` | ✅ **User must be logged in** |
+
+### **RSVP System**
+| Form | URL | Method | Permission Check? |
+|------|------|--------|------------------|
+| **RSVP Submission** | `/rsvp` | `POST` | ✅ **User must be logged in** |
+
+
 
 ## ✅ Course requirement checklist
 

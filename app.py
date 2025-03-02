@@ -80,17 +80,22 @@ def rsvp():
 
 @app.route("/group/<int:group_id>")
 def show_group(group_id):
+    check_login()
+    user_id = session["user_id"]
     group = groups.get_group(group_id)
     if not group:
         abort(404)
 
-    # Fetch group members and their roles
-    group_members = users.get_users_in_group_with_roles(group_id)
+    user_groups = groups.get_user_group_ids(user_id)
 
-    # Fetch entries associated with the group
+    if group_id not in user_groups:
+        return "Error: You do not have permission to view this group", 403
+
+    group_members = users.get_users_in_group_with_roles(group_id)
     group_entries = entries.get_entries_by_group(group_id)
 
     return render_template("show_group.html", group=group, members=group_members, entries=group_entries)
+
 
 @app.route("/manage_groups")
 def manage_groups():
@@ -398,12 +403,12 @@ def register():
 @app.route("/create", methods=["POST"])
 def create():
     if "user_id" in session:
-        return redirect("/")  # Redirect logged-in users to homepage
+        return redirect("/")  # Prevent logged-in users from submitting
 
     username = request.form["username"]
     password1 = request.form["password1"]
     password2 = request.form["password2"]
-    
+
     if password1 != password2:
         return "Error: Passwords do not match"
 
@@ -415,7 +420,6 @@ def create():
         return "Error: Username already taken"
 
     return redirect("/")
-
 
 
 @app.route("/login", methods=["GET", "POST"])
