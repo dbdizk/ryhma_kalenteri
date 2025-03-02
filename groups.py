@@ -99,3 +99,13 @@ def change_user_role(user_id, group_id, new_role):
     sql = "UPDATE user_groups SET role_id = ? WHERE user_id = ? AND group_id = ?"
     db.execute(sql, [new_role, user_id, group_id])
 
+def get_user_groups(user_id):
+    sql = """SELECT g.id, g.name FROM groups g
+             JOIN user_groups ug ON g.id = ug.group_id
+             WHERE ug.user_id = ?"""
+    return db.query(sql, [user_id])
+
+def get_user_group_ids(user_id):
+    sql = "SELECT group_id FROM user_groups WHERE user_id = ?"
+    result = db.query(sql, [user_id])
+    return [row["group_id"] for row in result]  # Return a list of group IDs

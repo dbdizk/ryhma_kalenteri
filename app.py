@@ -196,9 +196,10 @@ def create_category():
 @app.route("/new_entry")
 def new_entry():
     check_login()
+    user_id = session["user_id"]
     all_categories=categories.get_categories()
-    all_groups=groups.get_groups()
-    return render_template("new_entry.html", categories=all_categories, groups=all_groups)
+    user_groups = groups.get_user_groups(user_id)
+    return render_template("new_entry.html", categories=all_categories, groups=user_groups)
 
 @app.route("/create_entry", methods=["POST"])
 def create_entry():
@@ -213,8 +214,13 @@ def create_entry():
     time=request.form["time"]
     duration=request.form["duration"]
     user_id = session["user_id"]
-
     category_id = request.form["category"]
+
+    selected_groups = set(request.form.getlist("groups"))
+    user_group_ids = set(groups.get_user_group_ids(user_id))
+
+    if not selected_groups.issubset(user_group_ids):
+        return "Error: You cannot add an entry to a group you do not belong to <br> <a href='/new_entry'>Return to entry creation</a>"
     entry_id = entries.add_entry(title,description,date,time,duration,user_id,category_id)
     
     if not entry_id:
@@ -229,18 +235,21 @@ def create_entry():
 @app.route("/edit_entry/<int:entry_id>")
 def edit_entry(entry_id):
     check_login()
+    user_id = session["user_id"]
     entry = entries.get_entry(entry_id)
     all_categories = categories.get_categories()
     if not entry:
         abort(404)
     if entry["user_id"] != session["user_id"]:
         abort(403)
-    all_groups = groups.get_groups()
+    user_groups = groups.get_user_groups(user_id)
     entry_group_ids = groups.get_entry_group_ids(entry_id)
-    return render_template("edit_entry.html", entry=entry, categories=all_categories, all_groups=all_groups, entry_group_ids=entry_group_ids)
+    return render_template("edit_entry.html", entry=entry, categories=all_categories, all_groups=user_groups, entry_group_ids=entry_group_ids)
 
 @app.route("/update_entry", methods=["POST"])
 def update_entry():
+    check_login()
+    user_id = session["user_id"]
     entry_id=request.form["entry_id"]
     entry = entries.get_entry(entry_id)
     if not entry:
@@ -258,6 +267,11 @@ def update_entry():
     time=request.form["time"]
     duration=request.form["duration"]
     category_id = request.form["category"]
+    selected_groups = set(request.form.getlist("groups"))
+    user_group_ids = set(groups.get_user_group_ids(user_id))
+
+    if not selected_groups.issubset(user_group_ids):
+        return "Error: You cannot assign this entry to a group you do not belong to"
 
     entries.update_entry(entry_id, title, description, date, time, duration, category_id)
     new_group_ids = set(request.form.getlist("groups"))
@@ -265,16 +279,6 @@ def update_entry():
 
     return redirect("/entry/" + str(entry_id))
 
-# For later use, after implementing user roles properly. WIP.
-#@app.route("/delete_category")
-#def delete_entry(entry_id):
-#    check_login()
-#    entry = entries.get_entry(entry_id)
-#    if not entry:
-#        abort(404)
-#    if entry["user_id"] != session["user_id"]:
-#        abort(403)
-#    return render_template("delete_entry.html", entry=entry)
 
 @app.route("/confirm_delete", methods=["POST"])
 def confirm_delete():
