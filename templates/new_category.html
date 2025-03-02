@@ -9,6 +9,7 @@
 <body>
     <h1>Add New Category</h1>
     <form action="/create_category" method="post">
+        <input type="hidden" name="csrf_token" value="{{ session.csrf_token }}" />
         <label for="category_name">Category Name:</label>
         <input type="text" id="category_name" name="category_name" required>
         <br>

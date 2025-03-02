@@ -39,6 +39,7 @@
 
                     <!-- Change Role Form -->
                     <form action="/change_user_role" method="post" style="display:inline;">
+                        <input type="hidden" name="csrf_token" value="{{ session.csrf_token }}" />
                         <input type="hidden" name="user_id" value="{{ member.id }}">
                         <input type="hidden" name="group_id" value="{{ group.id }}">
                         <select name="new_role">
@@ -51,6 +52,7 @@
 
                     <!-- Remove Member Form -->
                     <form action="/remove_user_from_group" method="post" style="display:inline;">
+                        <input type="hidden" name="csrf_token" value="{{ session.csrf_token }}" />
                         <input type="hidden" name="user_id" value="{{ member.id }}">
                         <input type="hidden" name="group_id" value="{{ group.id }}">
                         <input type="submit" value="Remove Member">

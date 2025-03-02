@@ -45,6 +45,7 @@
         {% if "user_id" in session %}
             <h2>RSVP to This Event</h2>
             <form action="/rsvp" method="post">
+                <input type="hidden" name="csrf_token" value="{{ session.csrf_token }}" />
                 <input type="hidden" name="entry_id" value="{{ entry.id }}">
 
                 <button type="submit" name="status" value="attending"

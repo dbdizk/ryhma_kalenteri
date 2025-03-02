@@ -1,6 +1,7 @@
 import sqlite3
 from flask import Flask
 from flask import abort, redirect, render_template, request, session
+import secrets
 import config
 import db
 import entries
@@ -8,6 +9,7 @@ import users
 import categories
 import groups
 import rsvps
+import re
 
 
 app = Flask(__name__)
@@ -15,6 +17,10 @@ app.secret_key = config.secret_key
 
 def check_login():
     if "user_id" not in session:
+        abort(403)
+
+def check_csrf():
+    if request.form["csrf_token"] != session["csrf_token"]:
         abort(403)
 
 @app.route("/")
@@ -64,19 +70,18 @@ def show_user(user_id):
 @app.route("/rsvp", methods=["POST"])
 def rsvp():
     check_login()
+    check_csrf()
     user_id = session["user_id"]
     entry_id = request.form["entry_id"]
-    status = request.form["status"]
+    status = request.form["status"].strip().lower()
 
-    # Ensure the event exists
-    entry = entries.get_entry(entry_id)
-    if not entry:
-        abort(404)
+    # Validation
+    if status not in ["attending", "maybe", "not attending"]:
+        return "Error: Invalid RSVP status."
 
-    # Insert or update RSVP status
     rsvps.add_rsvp(user_id, entry_id, status)
-
     return redirect(f"/entry/{entry_id}")
+
 
 @app.route("/group/<int:group_id>")
 def show_group(group_id):
@@ -122,7 +127,7 @@ def manage_groups():
 @app.route("/add_user_to_group", methods=["POST"])
 def add_user_to_group():
     check_login()
-
+    check_csrf()
     user_id = request.form.get("user_id")
     group_id = request.form.get("group_id")
 
@@ -140,6 +145,7 @@ def add_user_to_group():
 @app.route("/remove_user_from_group", methods=["POST"])
 def remove_user_from_group():
     check_login()
+    check_csrf()
     admin_id = session["user_id"]
     user_id = request.form["user_id"]
     group_id = request.form["group_id"]
@@ -159,6 +165,7 @@ def remove_user_from_group():
 @app.route("/change_user_role", methods=["POST"])
 def change_user_role():
     check_login()
+    check_csrf()
     admin_id = session["user_id"]
     user_id = request.form["user_id"]
     group_id = request.form["group_id"]
@@ -228,9 +235,6 @@ def show_entry(entry_id):
         user_group_ids = set(groups.get_user_group_ids(user_id))
         entry_group_ids = {group["id"] for group in entry_groups}
 
-        print(f"DEBUG: Entry {entry_id} is in groups: {entry_group_ids}")
-        print(f"DEBUG: User {user_id} is in groups: {user_group_ids}")
-
         # If the user is not in any of the entry’s groups, deny access
         if not entry_group_ids.intersection(user_group_ids):
             return "Error: You do not have permission to view this entry", 403
@@ -258,22 +262,24 @@ def new_group():
 @app.route("/create_group", methods=["POST"])
 def create_group():
     check_login()
-    
-    name = request.form["group_name"]
-    description = request.form["description"]
-    creator_id = session["user_id"]
+    check_csrf()
+    name = request.form["group_name"].strip()
+    description = request.form["description"].strip()
 
-    if not name or len(name) > 50:
-        abort(403)
-    if not description or len(description) > 1000:
-        abort(403)
+    # Validation
+    if not name or len(name) < 3 or len(name) > 50:
+        return "Error: Group name must be between 3 and 50 characters."
+    if len(description) > 1000:
+        return "Error: Description cannot exceed 1000 characters."
 
+    user_id = session["user_id"]
     try:
-        group_id = groups.add_group(name, description, creator_id)
+        groups.add_group(name, description, user_id)
     except sqlite3.IntegrityError:
-        return "ERROR: Group already exists <br> <a href='/'>Return to main page</a>"
+        return "Error: Group already exists."
 
-    return "Group created <br> <a href='/'>return to main page</a>"
+    return redirect("/")
+
 
 
 @app.route("/new_category")
@@ -284,6 +290,7 @@ def new_category():
 @app.route("/create_category", methods=["POST"])
 def create_category():
     check_login()
+    check_csrf()
     name = request.form["category_name"]
     if not name or len(name) > 50:
         abort(403)
@@ -301,37 +308,64 @@ def new_entry():
 @app.route("/create_entry", methods=["POST"])
 def create_entry():
     check_login()
-    title=request.form["title"]
-    if not title or len(title) > 50:
-        abort(403)
-    description=request.form["description"]
-    if not description or len(description) > 1000:
-        abort(403)
-    date=request.form["date"]
-    time=request.form["time"]
-    duration=request.form["duration"]
+    check_csrf()
     user_id = session["user_id"]
-    category_id = request.form["category"]
 
+    # Strip whitespace from user inputs
+    title = request.form["title"].strip()
+    description = request.form["description"].strip()
+    date = request.form["date"].strip()
+    time = request.form["time"].strip()
+    duration = request.form["duration"].strip()
+    category_id = request.form["category"].strip()
+
+    # Validate title
+    if not title or len(title) > 50:
+        return "Error: Title must be between 1 and 50 characters.<br> <a href='/new_entry'>Return to entry creation</a>"
+
+    # Validate description
+    if not description or len(description) > 1000:
+        return "Error: Description cannot exceed 1000 characters.<br> <a href='/new_entry'>Return to entry creation</a>"
+
+    # Validate date format (YYYY-MM-DD)
+    if not re.match(r"^\d{4}-\d{2}-\d{2}$", date):
+        return "Error: Invalid date format. Use YYYY-MM-DD.<br> <a href='/new_entry'>Return to entry creation</a>"
+
+    # Validate time format (HH:MM)
+    if not re.match(r"^\d{2}:\d{2}$", time):
+        return "Error: Invalid time format. Use HH:MM.<br> <a href='/new_entry'>Return to entry creation</a>"
+
+    # Validate duration (must be a number: int or float)
+    if not re.match(r"^\d+(\.\d+)?$", duration):
+        return "Error: Duration must be a valid number.<br> <a href='/new_entry'>Return to entry creation</a>"
+
+    # Validate category_id (must be a number)
+    if not category_id.isdigit():
+        return "Error: Invalid category selection.<br> <a href='/new_entry'>Return to entry creation</a>"
+
+    # Convert category_id to integer
+    category_id = int(category_id)
+
+    # Get selected groups and validate
     selected_groups = set(map(int, request.form.getlist("groups")))
     user_group_ids = set(groups.get_user_group_ids(user_id))
 
-        # Debugging output
-    print(f"DEBUG: User {user_id} is in groups: {user_group_ids}")
-    print(f"DEBUG: User is trying to add entry to groups: {selected_groups}")
 
+    # Ensure user can only assign to groups they belong to
     if not selected_groups.issubset(user_group_ids):
-        return "Error: You cannot add an entry to a group you do not belong to <br> <a href='/new_entry'>Return to entry creation</a>"
-    entry_id = entries.add_entry(title,description,date,time,duration,user_id,category_id)
+        return "Error: You cannot add an entry to a group you do not belong to.<br> <a href='/new_entry'>Return to entry creation</a>"
+
+    # Create the entry
+    entry_id = entries.add_entry(title, description, date, time, duration, user_id, category_id)
     
     if not entry_id:
         return "Error: Could not create entry", 500  # Stop execution if entry creation fails
 
-    group_ids=request.form.getlist("groups")
-    entries.assign_entry_to_groups(entry_id, group_ids)
-
+    # Assign entry to groups
+    entries.assign_entry_to_groups(entry_id, selected_groups)
 
     return redirect("/")
+
 
 @app.route("/edit_entry/<int:entry_id>")
 def edit_entry(entry_id):
@@ -350,6 +384,7 @@ def edit_entry(entry_id):
 @app.route("/update_entry", methods=["POST"])
 def update_entry():
     check_login()
+    check_csrf()
     user_id = session["user_id"]
     entry_id=request.form["entry_id"]
     entry = entries.get_entry(entry_id)
@@ -383,6 +418,7 @@ def update_entry():
 
 @app.route("/confirm_delete", methods=["POST"])
 def confirm_delete():
+    check_csrf()
     entry_id = request.form["entry_id"]
     password = request.form["password"]
 
@@ -405,21 +441,27 @@ def create():
     if "user_id" in session:
         return redirect("/")  # Prevent logged-in users from submitting
 
-    username = request.form["username"]
+    username = request.form["username"].strip()
     password1 = request.form["password1"]
     password2 = request.form["password2"]
 
+    # Validation
+    if not username or len(username) < 3 or len(username) > 20:
+        return "Error: Username must be between 3 and 20 characters."
+    if len(password1) < 8:
+        return "Error: Password must be at least 8 characters long."
     if password1 != password2:
-        return "Error: Passwords do not match"
+        return "Error: Passwords do not match."
 
     try:
         user_id = users.create_user(username, password1)
         session["user_id"] = user_id  # Automatically log in
         session["username"] = username
     except sqlite3.IntegrityError:
-        return "Error: Username already taken"
+        return "Error: Username already taken."
 
     return redirect("/")
+
 
 
 @app.route("/login", methods=["GET", "POST"])
@@ -436,6 +478,7 @@ def login():
         user_id = users.check_login(username, password)
         if user_id:
             session["user_id"] = user_id
+            session["csrf_token"] = secrets.token_hex(16)
             session["username"] = username
             return redirect("/")
         else:

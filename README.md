@@ -110,6 +110,46 @@ This project is open-source and free to use under the **MIT License**.
 | **RSVP Submission** | `/rsvp` | `POST` | ✅ **User must be logged in** |
 
 
+## 🔐 Form Validation & CSRF Protection
+
+### **User Input Validation**
+All user inputs are strictly validated to ensure data integrity and security.
+
+| Field | Validations Applied |
+|--------|-------------------|
+| **Username** | Must be 3-20 characters, cannot be empty, trimmed for spaces |
+| **Password** | Minimum 8 characters, must match confirmation password |
+| **Entry Title** | 1-50 characters, cannot be empty |
+| **Entry Description** | 1-1000 characters, cannot be empty |
+| **Date** | Must be in `YYYY-MM-DD` format |
+| **Time** | Must be in `HH:MM` format |
+| **Duration** | Must be a valid number (integer or float) |
+| **Category Selection** | Must be a valid category ID (numeric check) |
+| **Group Selection** | User can only assign entries to groups they belong to |
+
+**All user inputs are stripped of unnecessary spaces and checked before database insertion.**
+
+### **CSRF Protection**
+All critical form submissions are protected against **Cross-Site Request Forgery (CSRF)** attacks using **session-based CSRF tokens**.
+
+| Form | URL | CSRF Protection Applied? |
+|------|------|------------------------|
+| **Create Entry** | `/create_entry` | ✅ Yes |
+| **Edit Entry** | `/update_entry` | ✅ Yes |
+| **Delete Entry** | `/confirm_delete` | ✅ Yes |
+| **Create Group** | `/create_group` | ✅ Yes |
+| **Add User to Group** | `/add_user_to_group` | ✅ Yes |
+| **Remove User from Group** | `/remove_user_from_group` | ✅ Yes |
+| **Change User Role** | `/change_user_role` | ✅ Yes |
+| **Create Category** | `/create_category` | ✅ Yes |
+| **RSVP to Event** | `/rsvp` | ✅ Yes |
+| **Register User** | `/create` | ❌ No (Not required) |
+| **Login User** | `/login` | ❌ No (Not required) |
+
+**CSRF tokens are generated on login and validated before modifying sensitive data.**
+
+
+
 
 ## ✅ Course requirement checklist
 
@@ -181,11 +221,11 @@ This project is open-source and free to use under the **MIT License**.
 
 - [x] Passwords stored securely in the database (1 point)
 - [x] User permissions checked before allowing access to pages (5 points)
-- [ ] User permissions checked before allowing form submissions (5 points)
-- [ ] User inputs validated before being added to the database (3 points)
+- [x] User permissions checked before allowing form submissions (5 points)
+- [x] User inputs validated before being added to the database (3 points)
 - [x] SQL queries use parameterized queries to prevent SQL injection (2 points)
 - [x] Pages rendered through templates (2 points)
-- [ ] CSRF protection used in forms (2 points)
+- [x] CSRF protection used in forms (2 points)
 
 ## Handling Large Data Volumes (5 points)
 
