@@ -8,6 +8,7 @@
 <body>
     <h1>New event</h1>
   <form action="/create_entry" method="post">
+    <input type="hidden" name="csrf_token" value="{{ session.csrf_token }}" />
     <p>
       Title *<br />
       <input type="text" name="title" maxlength="50" required/>
