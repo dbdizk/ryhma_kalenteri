@@ -42,7 +42,7 @@ def get_admin_groups(user_id):
 
 
 def get_group(group_id):
-    sql = "SELECT * FROM groups WHERE id = ?"
+    sql = "SELECT id, name, description FROM groups WHERE id = ?"
     result = db.query(sql, [group_id])
     return result[0] if result else None
 
