@@ -179,11 +179,11 @@ All critical form submissions are protected against **Cross-Site Request Forgery
 
 ## Functionality and Usability (15 points)
 
-- [?] User experience with the functionality of the application (5 points)
-- [?] User experience with the usability of the application (5 points)
-- [ ] Line breaks in user-submitted text are visible in the browser (1 point)
+- [ ] User experience with the functionality of the application (5 points) - Hard for me to say
+- [ ] User experience with the usability of the application (5 points) - Hard for me to say
+- [x] Line breaks in user-submitted text are visible in the browser (1 point)
 - [x] Alt attribute used for images (if images are present) (1 point)
-- [-] Label element used in forms (1 point) - Too lazy to do this
+- [ ] Label element used in forms (1 point) - Too lazy to do this
 - [x] CSS used for layout and styling (2 points)
 
 ## Version Control (10 points)
@@ -200,10 +200,10 @@ All critical form submissions are protected against **Cross-Site Request Forgery
 - [x] Indentation level is four spaces (1 point)
 - [x] Code written in English (1 point)
 - [x] Variable and function names in snake_case (e.g., `total_count`, not `totalCount`) (1 point)
-- [ ] Consistent use of single or double quotes for strings (1 point)
-- [ ] Proper spacing around assignment (`=`) and comparison (`==`) operators (1 point)
-- [ ] Proper spacing around commas (1 point)
-- [ ] Avoid returning `True` or `False` directly after an `if` statement (1 point)
+- [x] Consistent use of single or double quotes for strings (1 point) - Double quotes by default. Singles only used where necessary (inside doubles)
+- [x] Proper spacing around assignment (`=`) and comparison (`==`) operators (1 point) - Pylint not isntallable on fresher laptop. Checked manually so might be 1 or 2 errors, but shouldn't be any.
+- [x] Proper spacing around commas (1 point) - Pylint not isntallable on fresher laptop. Checked manually so might be 1 or 2 errors, but shouldn't be any.
+- [x] Avoid returning `True` or `False` directly after an `if` statement (1 point)
 - [x] Functions should have multiple potential return values if needed (1 point)
 - [x] No parentheses around conditions in `if` and `while` statements (1 point)
 - [x] Use `is None` rather than `== None` for checking null values (1 point)

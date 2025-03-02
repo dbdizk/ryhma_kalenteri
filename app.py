@@ -16,22 +16,25 @@ import re
 app = Flask(__name__)
 app.secret_key = config.secret_key
 
+# Check if user is logged in
 def check_login():
     if "user_id" not in session:
         abort(403)
 
+# Check CSRF token
 def check_csrf():
     if request.form["csrf_token"] != session["csrf_token"]:
         abort(403)
 
-@app.template_filter('nl2br')
+# Custom Jinja filter for converting newlines to <br> tags
+@app.template_filter("nl2br")
 def nl2br_filter(text):
     """ Converts newlines (\n) to <br> tags for HTML rendering """
     if text is None:
         return ""
     return Markup(text.replace("\n", "<br>"))
 
-
+# Index route
 @app.route("/")
 def index():
     user_id = session.get("user_id")
@@ -56,7 +59,7 @@ def index():
     return render_template("index.html", grouped_entries=grouped_entries, user_rsvp_status=user_rsvp_status)
 
 
-
+# User profile route
 @app.route("/user/<int:user_id>")
 def show_user(user_id):
     user = users.get_user(user_id)
@@ -76,6 +79,7 @@ def show_user(user_id):
     )
 
 
+# RSVP route
 @app.route("/rsvp", methods=["POST"])
 def rsvp():
     check_login()
@@ -92,6 +96,7 @@ def rsvp():
     return redirect(f"/entry/{entry_id}")
 
 
+# Group route
 @app.route("/group/<int:group_id>")
 def show_group(group_id):
     check_login()
@@ -110,7 +115,36 @@ def show_group(group_id):
 
     return render_template("show_group.html", group=group, members=group_members, entries=group_entries)
 
+# Group creation page route
+@app.route("/new_group")
+def new_group():
+    check_login()
+    return render_template("new_group.html")
 
+# Group creation form route
+@app.route("/create_group", methods=["POST"])
+def create_group():
+    check_login()
+    check_csrf()
+    name = request.form["group_name"].strip()
+    description = request.form["description"].strip()
+
+    # Validation
+    if not name or len(name) < 3 or len(name) > 50:
+        return "Error: Group name must be between 3 and 50 characters."
+    if len(description) > 1000:
+        return "Error: Description cannot exceed 1000 characters."
+
+    user_id = session["user_id"]
+    try:
+        groups.add_group(name, description, user_id)
+    except sqlite3.IntegrityError:
+        return "Error: Group already exists."
+
+    return redirect("/")
+
+
+# Group management route
 @app.route("/manage_groups")
 def manage_groups():
     check_login()
@@ -126,13 +160,13 @@ def manage_groups():
 
     # Attach members and roles for each group
     for group in admin_groups:
-        group["members"] = users.get_users_in_group_with_roles(group["id"])  # ✅ Now this works!
+        group["members"] = users.get_users_in_group_with_roles(group["id"])
 
     return render_template("manage_groups.html", groups=admin_groups, users=all_users)
 
 
 
-
+# Group member adding
 @app.route("/add_user_to_group", methods=["POST"])
 def add_user_to_group():
     check_login()
@@ -151,6 +185,7 @@ def add_user_to_group():
 
     return redirect("/manage_groups")
 
+# Group member removal
 @app.route("/remove_user_from_group", methods=["POST"])
 def remove_user_from_group():
     check_login()
@@ -171,6 +206,7 @@ def remove_user_from_group():
 
     return redirect("/manage_groups")
 
+# Group role change
 @app.route("/change_user_role", methods=["POST"])
 def change_user_role():
     check_login()
@@ -195,7 +231,7 @@ def change_user_role():
 
 
 
-
+# Entry filtering route
 @app.route("/find_entry")
 def find_entry():
     query = request.args.get("query", "").strip()
@@ -226,7 +262,7 @@ def find_entry():
 
 
     
-
+# Entry page route
 @app.route("/entry/<int:entry_id>")
 def show_entry(entry_id):
     entry = entries.get_entry(entry_id)
@@ -259,38 +295,6 @@ def show_entry(entry_id):
 
 
 
-
-
-
-
-@app.route("/new_group")
-def new_group():
-    check_login()
-    return render_template("new_group.html")
-
-@app.route("/create_group", methods=["POST"])
-def create_group():
-    check_login()
-    check_csrf()
-    name = request.form["group_name"].strip()
-    description = request.form["description"].strip()
-
-    # Validation
-    if not name or len(name) < 3 or len(name) > 50:
-        return "Error: Group name must be between 3 and 50 characters."
-    if len(description) > 1000:
-        return "Error: Description cannot exceed 1000 characters."
-
-    user_id = session["user_id"]
-    try:
-        groups.add_group(name, description, user_id)
-    except sqlite3.IntegrityError:
-        return "Error: Group already exists."
-
-    return redirect("/")
-
-
-
 @app.route("/new_category")
 def new_category():
     check_login()
@@ -310,7 +314,7 @@ def create_category():
 def new_entry():
     check_login()
     user_id = session["user_id"]
-    all_categories=categories.get_categories()
+    all_categories = categories.get_categories()
     user_groups = groups.get_user_groups(user_id)
     return render_template("new_entry.html", categories=all_categories, groups=user_groups)
 
@@ -395,22 +399,22 @@ def update_entry():
     check_login()
     check_csrf()
     user_id = session["user_id"]
-    entry_id=request.form["entry_id"]
+    entry_id = request.form["entry_id"]
     entry = entries.get_entry(entry_id)
     if not entry:
         abort(404)
     if entry["user_id"] != session["user_id"]:
         abort(403)
 
-    title=request.form["title"]
+    title = request.form["title"]
     if not title or len(title) > 50:
         abort(403)
-    description=request.form["description"]
+    description = request.form["description"]
     if not description or len(description) > 1000:
         abort(403)
-    date=request.form["date"]
-    time=request.form["time"]
-    duration=request.form["duration"]
+    date = request.form["date"]
+    time = request.form["time"]
+    duration = request.form["duration"]
     category_id = request.form["category"]
     selected_groups = set(map(int, request.form.getlist("groups")))
     user_group_ids = set(groups.get_user_group_ids(user_id))

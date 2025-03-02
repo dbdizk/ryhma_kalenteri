@@ -3,7 +3,7 @@ import db
 def add_group(name, description, creator_id):
     sql = "INSERT INTO groups (name, description) VALUES (?, ?)"
     db.execute(sql, [name, description])  # Insert and get new group ID
-    group_id= db.last_insert_id()
+    group_id = db.last_insert_id()
 
     # Assign the creator as an admin (role_id = 1)
     sql_assign_admin = "INSERT INTO user_groups (user_id, group_id, role_id) VALUES (?, ?, 1)"
